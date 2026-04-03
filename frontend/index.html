@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0d0d14">
+<title>Twin Roll</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0d0d14;
+  --surface:#16161f;
+  --surface2:#1e1e2a;
+  --border:#2a2a3a;
+  --red:#e63946;
+  --green:#2dc653;
+  --yellow:#f4c542;
+  --blue:#4895ef;
+  --text:#f0f0f5;
+  --muted:#6b6b8a;
+  --accent:#f4c542;
+  --radius:14px;
+  --cell:min(10vw, 52px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100dvh;overflow-x:hidden}
+h1,h2,h3{font-family:'Syne',sans-serif}
+
+/* ─── SCREENS ─────────────────────────────────── */
+.screen{display:none;min-height:100dvh;padding:20px 16px 32px;max-width:480px;margin:0 auto}
+.screen.active{display:flex;flex-direction:column}
+
+/* ─── HOME ────────────────────────────────────── */
+#homeScreen{align-items:center;justify-content:center;gap:28px;text-align:center}
+.logo{display:flex;flex-direction:column;align-items:center;gap:4px}
+.logo h1{font-size:3rem;font-weight:800;letter-spacing:-1px;line-height:1}
+.logo .tagline{color:var(--muted);font-size:.9rem;letter-spacing:.1em;text-transform:uppercase}
+.dice-pair{display:flex;gap:10px;font-size:2.4rem;animation:float 3s ease-in-out infinite}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:16px;border:none;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:transform .1s,opacity .1s}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#0d0d14}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost{background:transparent;color:var(--muted);font-size:.9rem}
+.home-btns{display:flex;flex-direction:column;gap:10px;width:100%}
+
+/* ─── LOBBY FORM ──────────────────────────────── */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;display:flex;flex-direction:column;gap:14px}
+.form-row{display:flex;flex-direction:column;gap:6px}
+label{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+input[type=text]{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:1rem;width:100%;outline:none}
+input[type=text]:focus{border-color:var(--accent)}
+.toggle-row{display:flex;justify-content:space-between;align-items:center}
+.toggle{position:relative;width:48px;height:26px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--surface2);border-radius:50px;transition:.3s;border:1px solid var(--border)}
+.slider:before{content:'';position:absolute;width:20px;height:20px;left:2px;top:2px;background:var(--muted);border-radius:50%;transition:.3s}
+input:checked+.slider{background:var(--accent)}
+input:checked+.slider:before{transform:translateX(22px);background:#0d0d14}
+.seg{display:flex;background:var(--surface2);border-radius:10px;padding:3px;gap:3px}
+.seg-btn{flex:1;padding:10px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:600;border-radius:8px;cursor:pointer;transition:.2s}
+.seg-btn.active{background:var(--accent);color:#0d0d14}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.95rem;cursor:pointer;padding:0 0 8px;margin-bottom:4px}
+
+/* ─── WAITING ROOM ────────────────────────────── */
+#waitScreen{gap:20px}
+.room-code-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;text-align:center}
+.room-code{font-family:'Syne',sans-serif;font-size:2.4rem;letter-spacing:.2em;color:var(--accent)}
+.room-code-label{font-size:.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.player-slots{display:flex;flex-direction:column;gap:8px}
+.player-slot{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+.player-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.player-slot-name{flex:1;font-weight:500}
+.ready-badge{font-size:.75rem;font-weight:600;padding:3px 8px;border-radius:20px;background:var(--surface2);color:var(--muted)}
+.ready-badge.yes{background:#1a3a1e;color:var(--green)}
+.empty-slot{color:var(--muted);font-style:italic}
+.mode-badge{display:inline-flex;align-items:center;gap:6px;background:var(--surface2);border-radius:8px;padding:6px 12px;font-size:.85rem;color:var(--muted)}
+
+/* ─── GAME SCREEN ─────────────────────────────── */
+#gameScreen{padding:0;gap:0;max-width:100%;overflow:hidden}
+.game-header{display:flex;justify-content:space-between;align-items:center;padding:12px 14px 8px}
+.turn-indicator{display:flex;align-items:center;gap:8px;font-weight:600;font-size:.95rem}
+.turn-dot{width:10px;height:10px;border-radius:50%}
+.score-strip{display:flex;gap:8px;overflow-x:auto;padding:0 14px 8px;scrollbar-width:none}
+.score-strip::-webkit-scrollbar{display:none}
+.score-chip{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:.78rem;white-space:nowrap;flex-shrink:0}
+.score-chip.active{border-color:var(--accent);background:rgba(244,197,66,.07)}
+
+/* ─── BOARD ───────────────────────────────────── */
+.board-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:4px;overflow:hidden}
+.ludo-board{display:grid;grid-template-columns:repeat(15,var(--cell));grid-template-rows:repeat(15,var(--cell));position:relative;border-radius:8px;overflow:hidden;border:2px solid var(--border)}
+.cell{display:flex;align-items:center;justify-content:center;position:relative;font-size:.6rem}
+.cell-safe{background:rgba(244,197,66,.08)}
+.cell-safe::after{content:'★';font-size:.65rem;color:rgba(244,197,66,.4);position:absolute;top:1px;right:2px}
+/* Home bases */
+.home-red{background:#2a0a0a;border:1px solid rgba(230,57,70,.3)}
+.home-green{background:#0a2a0f;border:1px solid rgba(45,198,83,.3)}
+.home-yellow{background:#2a240a;border:1px solid rgba(244,197,66,.3)}
+.home-blue{background:#0a1428;border:1px solid rgba(72,149,239,.3)}
+/* Home finish zones */
+.finish-red{background:rgba(230,57,70,.25)}
+.finish-green{background:rgba(45,198,83,.25)}
+.finish-yellow{background:rgba(244,197,66,.25)}
+.finish-blue{background:rgba(72,149,239,.25)}
+.finish-center{background:linear-gradient(135deg,rgba(230,57,70,.4),rgba(45,198,83,.4),rgba(244,197,66,.4),rgba(72,149,239,.4))}
+/* Track */
+.track-red{background:rgba(230,57,70,.12)}
+.track-green{background:rgba(45,198,83,.12)}
+.track-yellow{background:rgba(244,197,66,.12)}
+.track-blue{background:rgba(72,149,239,.12)}
+
+.piece{width:72%;height:72%;border-radius:50%;border:2px solid rgba(255,255,255,.25);cursor:pointer;position:relative;z-index:2;transition:transform .15s,box-shadow .15s;flex-shrink:0;font-size:.55rem;font-weight:700;color:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center}
+.piece:active{transform:scale(.9)}
+.piece.valid-move{animation:pulse-piece .8s ease-in-out infinite;box-shadow:0 0 0 3px rgba(244,197,66,.7);cursor:pointer}
+.piece.selected{box-shadow:0 0 0 4px white;transform:scale(1.15)}
+@keyframes pulse-piece{0%,100%{box-shadow:0 0 0 3px rgba(244,197,66,.7)}50%{box-shadow:0 0 0 6px rgba(244,197,66,.3)}}
+.piece-red{background:radial-gradient(circle at 35% 35%,#ff6b78,#c1121f)}
+.piece-green{background:radial-gradient(circle at 35% 35%,#52d97a,#1a8a3a)}
+.piece-yellow{background:radial-gradient(circle at 35% 35%,#ffd84d,#c49a00)}
+.piece-blue{background:radial-gradient(circle at 35% 35%,#6eb8ff,#1a65bb)}
+.pieces-stack{display:flex;flex-wrap:wrap;gap:1px;align-items:center;justify-content:center;width:100%;height:100%}
+
+/* ─── DICE PANEL ──────────────────────────────── */
+.dice-panel{padding:10px 14px 14px;background:var(--surface);border-top:1px solid var(--border)}
+.dice-panel-inner{display:flex;align-items:center;gap:12px}
+.dice-area{display:flex;gap:8px;flex:1}
+.die{width:52px;height:52px;border-radius:10px;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.6rem;transition:transform .3s;flex-shrink:0;position:relative;overflow:hidden}
+.die.rolled{animation:die-roll .4s ease-out}
+.die.used{opacity:.35;transform:scale(.9)}
+.die.available{border-color:var(--accent);box-shadow:0 0 10px rgba(244,197,66,.2)}
+@keyframes die-roll{0%{transform:rotate(0deg) scale(1)}30%{transform:rotate(180deg) scale(1.2)}60%{transform:rotate(300deg) scale(1.05)}100%{transform:rotate(360deg) scale(1)}}
+.die-label{font-size:.6rem;font-weight:700;color:var(--accent);position:absolute;top:2px;right:3px}
+.roll-btn{flex:1;min-width:0;padding:14px 10px;max-width:140px}
+.status-msg{font-size:.82rem;color:var(--muted);flex:1;text-align:center;line-height:1.4}
+
+/* ─── HOME BASE TOKENS ─────────────────────────── */
+.home-token{width:65%;height:65%;border-radius:50%;border:2.5px solid rgba(255,255,255,.15)}
+
+/* ─── CHAT STRIP ──────────────────────────────── */
+.chat-area{height:80px;overflow-y:auto;padding:4px 14px;display:flex;flex-direction:column;gap:2px;scrollbar-width:none}
+.chat-area::-webkit-scrollbar{display:none}
+.chat-msg{font-size:.78rem;line-height:1.4}
+.chat-name{font-weight:600;margin-right:4px}
+.chat-input-row{display:flex;gap:6px;padding:6px 14px}
+.chat-input-row input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.85rem;outline:none}
+.chat-input-row button{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;color:var(--muted);cursor:pointer;font-size:.9rem}
+
+/* ─── WIN OVERLAY ─────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.overlay.show{display:flex}
+.win-card{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:32px 24px;text-align:center;max-width:320px;width:100%}
+.win-emoji{font-size:4rem;margin-bottom:12px}
+.win-card h2{font-size:2rem;margin-bottom:6px}
+.win-card p{color:var(--muted);margin-bottom:24px}
+
+/* ─── TOASTS ──────────────────────────────────── */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 18px;font-size:.85rem;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;max-width:90vw}
+#toast.show{opacity:1}
+
+/* ─── NOTIFICATION ────────────────────────────── */
+.notif{position:fixed;top:16px;left:50%;transform:translateX(-50%);background:var(--accent);color:#0d0d14;border-radius:10px;padding:10px 18px;font-size:.88rem;font-weight:600;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200}
+.notif.show{opacity:1}
+
+/* ─── CHOOSE DIE MODAL ────────────────────────── */
+.die-modal{position:fixed;inset:0;display:none;align-items:flex-end;justify-content:center;z-index:99;background:rgba(0,0,0,.6)}
+.die-modal.show{display:flex}
+.die-modal-inner{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px}
+.die-modal-inner h3{font-size:1.1rem;margin-bottom:14px;text-align:center}
+.die-choices{display:flex;gap:10px;justify-content:center}
+.die-choice{display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--surface2);border:2px solid var(--border);border-radius:12px;padding:14px 20px;cursor:pointer;transition:border-color .2s}
+.die-choice:active{border-color:var(--accent)}
+.die-choice.sel{border-color:var(--accent)}
+.die-choice span{font-size:2rem}
+.die-choice small{font-size:.75rem;color:var(--muted)}
+.die-modal-btns{display:flex;gap:8px;margin-top:16px}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="homeScreen" class="screen active">
+  <div class="logo">
+    <div class="dice-pair">🎲🎲</div>
+    <h1>Twin Roll</h1>
+    <div class="tagline">Ludo, doubled</div>
+  </div>
+  <div class="home-btns">
+    <button class="btn btn-primary" onclick="showScreen('createScreen')">Create Room</button>
+    <button class="btn btn-secondary" onclick="showScreen('joinScreen')">Join with Code</button>
+    <button class="btn btn-secondary" onclick="showScreen('matchScreen')">Quick Match</button>
+  </div>
+</div>
+
+<!-- CREATE ROOM -->
+<div id="createScreen" class="screen">
+  <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
+  <h2 style="margin-bottom:16px">Create Room</h2>
+  <div class="form-card">
+    <div class="form-row">
+      <label>Your Name</label>
+      <input type="text" id="createName" placeholder="Enter name" maxlength="20">
+    </div>
+    <div class="form-row">
+      <label>Players</label>
+      <div class="seg">
+        <button class="seg-btn active" data-val="2" onclick="selectSeg(this,'createPlayers')">2</button>
+        <button class="seg-btn" data-val="4" onclick="selectSeg(this,'createPlayers')">4</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Dice Mode</label>
+      <div class="seg">
+        <button class="seg-btn active" data-val="false" onclick="selectSeg(this,'createTwin')">Normal</button>
+        <button class="seg-btn" data-val="true" onclick="selectSeg(this,'createTwin')">🎲🎲 Twin</button>
+      </div>
+    </div>
+    <div class="form-row toggle-row">
+      <div>
+        <div style="font-weight:500">Public Room</div>
+        <div style="font-size:.8rem;color:var(--muted)">Visible in matchmaking</div>
+      </div>
+      <label class="toggle"><input type="checkbox" id="createPublic"><span class="slider"></span></label>
+    </div>
+    <button class="btn btn-primary" onclick="doCreate()">Create & Wait</button>
+  </div>
+</div>
+
+<!-- JOIN SCREEN -->
+<div id="joinScreen" class="screen">
+  <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
+  <h2 style="margin-bottom:16px">Join Room</h2>
+  <div class="form-card">
+    <div class="form-row">
+      <label>Your Name</label>
+      <input type="text" id="joinName" placeholder="Enter name" maxlength="20">
+    </div>
+    <div class="form-row">
+      <label>Room Code</label>
+      <input type="text" id="joinCode" placeholder="ABC123" maxlength="6" style="text-transform:uppercase;letter-spacing:.2em;font-family:'Syne',sans-serif;font-size:1.3rem">
+    </div>
+    <button class="btn btn-primary" onclick="doJoin()">Join Room</button>
+  </div>
+</div>
+
+<!-- MATCH SCREEN -->
+<div id="matchScreen" class="screen">
+  <button class="back-btn" onclick="showScreen('homeScreen')">← Back</button>
+  <h2 style="margin-bottom:16px">Quick Match</h2>
+  <div class="form-card">
+    <div class="form-row">
+      <label>Your Name</label>
+      <input type="text" id="matchName" placeholder="Enter name" maxlength="20">
+    </div>
+    <div class="form-row">
+      <label>Players</label>
+      <div class="seg">
+        <button class="seg-btn active" data-val="2" onclick="selectSeg(this,'matchPlayers')">2</button>
+        <button class="seg-btn" data-val="4" onclick="selectSeg(this,'matchPlayers')">4</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <label>Dice Mode</label>
+      <div class="seg">
+        <button class="seg-btn active" data-val="false" onclick="selectSeg(this,'matchTwin')">Normal</button>
+        <button class="seg-btn" data-val="true" onclick="selectSeg(this,'matchTwin')">🎲🎲 Twin</button>
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="doMatch()">Find Match</button>
+  </div>
+</div>
+
+<!-- WAIT SCREEN -->
+<div id="waitScreen" class="screen">
+  <div class="room-code-card">
+    <div class="room-code" id="displayCode">------</div>
+    <div class="room-code-label">Share this code</div>
+    <button class="btn btn-ghost" style="margin-top:10px" onclick="copyCode()">📋 Copy Code</button>
+  </div>
+  <div id="modeBadge" class="mode-badge" style="align-self:center"></div>
+  <div class="player-slots" id="waitPlayerList"></div>
+  <button class="btn btn-primary" id="readyBtn" onclick="toggleReady()">I'm Ready</button>
+  <div id="waitStatus" style="text-align:center;color:var(--muted);font-size:.85rem"></div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="gameScreen" class="screen">
+  <div class="game-header">
+    <div class="turn-indicator">
+      <div class="turn-dot" id="turnDot"></div>
+      <span id="turnLabel">Waiting...</span>
+    </div>
+    <div id="diceModeBadge" style="font-size:.75rem;color:var(--muted)"></div>
+  </div>
+  <div class="score-strip" id="scoreStrip"></div>
+  <div class="board-wrap">
+    <div class="ludo-board" id="ludoBoard"></div>
+  </div>
+  <div class="dice-panel">
+    <div class="dice-panel-inner">
+      <div class="dice-area" id="diceArea"></div>
+      <button class="btn btn-primary roll-btn" id="rollBtn" onclick="doRoll()">Roll</button>
+      <div class="status-msg" id="statusMsg" style="display:none"></div>
+    </div>
+  </div>
+  <div class="chat-area" id="chatArea"></div>
+  <div class="chat-input-row">
+    <input type="text" id="chatInput" placeholder="Message..." maxlength="100" onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<!-- WIN OVERLAY -->
+<div class="overlay" id="winOverlay">
+  <div class="win-card">
+    <div class="win-emoji">🏆</div>
+    <h2 id="winTitle">Winner!</h2>
+    <p id="winSub"></p>
+    <button class="btn btn-primary" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<!-- CHOOSE DIE MODAL -->
+<div class="die-modal" id="dieModal">
+  <div class="die-modal-inner">
+    <h3>Which die to use?</h3>
+    <div class="die-choices" id="dieChoices"></div>
+    <div class="die-modal-btns">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeDieModal()">Cancel</button>
+      <button class="btn btn-primary" style="flex:1" onclick="confirmDieChoice()">Use It</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div class="notif" id="notif"></div>
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────────────────────────
+const WS_URL = (location.protocol==='https:'?'wss://':'ws://')+location.host+'/ws';
+const COLOR_HEX = {red:'#e63946',green:'#2dc653',yellow:'#f4c542',blue:'#4895ef'};
+const DICE_FACES = ['','⚀','⚁','⚂','⚃','⚄','⚅'];
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let ws, myId, myColor, roomCode, gameState;
+let selectedPieceId = null, selectedDieVal = null;
+let pendingDieChoicePieceId = null;
+let segVals = {createPlayers:'2', createTwin:'false', matchPlayers:'4', matchTwin:'false'};
+let isReady = false;
+
+// ─── WS ─────────────────────────────────────────────────────────────────────
+function connectWS(cb){
+  ws = new WebSocket(WS_URL);
+  ws.onopen = cb;
+  ws.onmessage = e => handleMsg(JSON.parse(e.data));
+  ws.onclose = () => toast('Disconnected');
+  ws.onerror = () => toast('Connection error');
+}
+function send(obj){ if(ws && ws.readyState===1) ws.send(JSON.stringify(obj)); }
+
+// ─── SCREENS ─────────────────────────────────────────────────────────────────
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function selectSeg(btn, key){
+  const grp = btn.closest('.seg');
+  grp.querySelectorAll('.seg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  segVals[key] = btn.dataset.val;
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function doCreate(){
+  const name = document.getElementById('createName').value.trim() || 'Player';
+  connectWS(()=>send({
+    action:'create_room', name,
+    max_players: parseInt(segVals.createPlayers),
+    twin_dice: segVals.createTwin==='true',
+    is_public: document.getElementById('createPublic').checked,
+  }));
+}
+function doJoin(){
+  const name = document.getElementById('joinName').value.trim() || 'Player';
+  const code = document.getElementById('joinCode').value.toUpperCase().trim();
+  if(!code){ toast('Enter a room code'); return; }
+  connectWS(()=>send({action:'join_room', name, code}));
+}
+function doMatch(){
+  const name = document.getElementById('matchName').value.trim() || 'Player';
+  connectWS(()=>send({
+    action:'find_match', name,
+    max_players: parseInt(segVals.matchPlayers),
+    twin_dice: segVals.matchTwin==='true',
+  }));
+}
+function toggleReady(){
+  send({action:'toggle_ready'});
+  isReady = !isReady;
+  document.getElementById('readyBtn').textContent = isReady ? '✓ Ready!' : "I'm Ready";
+  document.getElementById('readyBtn').style.background = isReady ? 'var(--green)' : 'var(--accent)';
+}
+function copyCode(){
+  navigator.clipboard.writeText(roomCode).then(()=>toast('Copied!'));
+}
+
+// ─── MESSAGE HANDLER ──────────────────────────────────────────────────────────
+function handleMsg(msg){
+  switch(msg.type){
+    case 'connected': myId = msg.player_id; break;
+    case 'room_state':
+    case 'waiting_for_players':
+      myColor = msg.your_color;
+      roomCode = msg.code;
+      renderWaitScreen(msg);
+      showScreen('waitScreen');
+      break;
+    case 'player_joined':
+      renderWaitPlayers(msg.players);
+      notify(`${msg.name} joined!`);
+      break;
+    case 'player_ready':
+      renderWaitPlayers(msg.players);
+      break;
+    case 'game_start':
+      gameState = msg.game;
+      buildBoard();
+      renderGame();
+      showScreen('gameScreen');
+      break;
+    case 'dice_rolled':
+      gameState = msg.game;
+      renderDice(msg.rolls, msg.valid_moves, msg.auto_pass);
+      renderGame();
+      if(msg.auto_pass) notify('No valid moves — turn skipped');
+      break;
+    case 'piece_moved':
+      gameState = msg.game;
+      handleMoveEvents(msg.events);
+      renderDiceAfterMove(msg.remaining_dice, msg.valid_moves);
+      renderGame();
+      break;
+    case 'player_left':
+      renderWaitPlayers(msg.players);
+      toast(`${msg.name} left the game`);
+      break;
+    case 'chat':
+      appendChat(msg.name, msg.color, msg.msg);
+      break;
+    case 'error':
+      toast(msg.msg);
+      break;
+  }
+}
+
+// ─── WAIT SCREEN ─────────────────────────────────────────────────────────────
+function renderWaitScreen(msg){
+  document.getElementById('displayCode').textContent = msg.code;
+  const badge = document.getElementById('modeBadge');
+  badge.innerHTML = msg.twin_dice ? '🎲🎲 Twin Dice Mode' : '🎲 Normal Mode';
+  badge.innerHTML += ` &nbsp;·&nbsp; ${msg.max_players} players`;
+  renderWaitPlayers(msg.players, msg.max_players);
+  if(msg.type==='waiting_for_players')
+    document.getElementById('waitStatus').textContent = 'Waiting for players to join...';
+}
+function renderWaitPlayers(players, max){
+  const list = document.getElementById('waitPlayerList');
+  max = max || players.length;
+  let html = '';
+  for(let i=0;i<max;i++){
+    const p = players[i];
+    const color = p ? COLOR_HEX[p.color] : '#333';
+    html += `<div class="player-slot">
+      <div class="player-dot" style="background:${color}"></div>
+      <span class="player-slot-name">${p ? p.name : '<span class="empty-slot">Waiting...</span>'}</span>
+      ${p ? `<span class="ready-badge ${p.ready?'yes':''}">${p.ready?'Ready':'Not ready'}</span>` : ''}
+    </div>`;
+  }
+  list.innerHTML = html;
+}
+
+// ─── BOARD BUILDER ────────────────────────────────────────────────────────────
+// 15×15 grid layout:
+// [row][col] = cell type
+// Track is 0–51, home columns are separate
+// Standard Ludo layout
+
+function buildBoard(){
+  const board = document.getElementById('ludoBoard');
+  board.innerHTML = '';
+  const grid = makeGridLayout();
+  for(let r=0;r<15;r++){
+    for(let c=0;c<15;c++){
+      const cell = document.createElement('div');
+      cell.className = 'cell '+grid[r][c];
+      cell.id = `cell_${r}_${c}`;
+      board.appendChild(cell);
+    }
+  }
+}
+
+// Map grid r,c → cell class string
+function makeGridLayout(){
+  const g = Array.from({length:15},()=>Array(15).fill(''));
+  // Home bases (6×6 each)
+  fillRect(g,0,0,6,6,'home-red');
+  fillRect(g,0,9,6,6,'home-green');
+  fillRect(g,9,0,6,6,'home-yellow');
+  fillRect(g,9,9,6,6,'home-blue');
+  // Center finish square
+  fillRect(g,6,6,3,3,'finish-center');
+  // Home columns
+  for(let i=1;i<6;i++) g[7][i]='finish-red';
+  for(let i=9;i<14;i++) g[i][7]='finish-blue';
+  for(let i=1;i<6;i++) g[7][14-i]='finish-green'; // reversed
+  for(let i=9;i<14;i++) g[14-i][7]='finish-yellow'; // reversed
+  // Track cells and coloured lanes
+  const track = getTrackCells();
+  const safes = [0,8,13,21,26,34,39,47]; // track indices of safe squares
+  track.forEach(([r,c],idx)=>{
+    let cls = 'cell-track';
+    if(safes.includes(idx)) cls += ' cell-safe';
+    g[r][c] = cls;
+  });
+  // Colour start lanes
+  colorLane(g,'track-red');
+  colorLane(g,'track-green');
+  colorLane(g,'track-yellow');
+  colorLane(g,'track-blue');
+  return g;
+}
+function fillRect(g,r,c,h,w,cls){
+  for(let i=r;i<r+h;i++) for(let j=c;j<c+w;j++) g[i][j]=cls;
+}
+function colorLane(g){
+  // Each coloured lane row = enter from track into home column
+  // Already handled in home column logic above
+}
+function getTrackCells(){
+  // Standard 52-cell Ludo track in clockwise order [row,col]
+  return [
+    // Top side, going right (red start zone)
+    [6,1],[6,2],[6,3],[6,4],[6,5],
+    [5,6],[4,6],[3,6],[2,6],[1,6],[0,6],
+    // Right turn down (green start zone)
+    [0,7],[0,8],
+    [1,8],[2,8],[3,8],[4,8],[5,8],[6,8],
+    // Right column going down
+    [6,9],[6,10],[6,11],[6,12],[6,13],[6,14],
+    // Bottom right turn
+    [7,14],[8,14],
+    // Bottom going left (blue start zone)
+    [8,13],[8,12],[8,11],[8,10],[8,9],
+    [9,8],[10,8],[11,8],[12,8],[13,8],[14,8],
+    // Bottom left turn
+    [14,7],[14,6],
+    // Left column going up (yellow start zone)
+    [13,6],[12,6],[11,6],[10,6],[9,6],
+    [8,5],[8,4],[8,3],[8,2],[8,1],[8,0],
+    // Top left turn
+    [7,0],[6,0],
+  ];
+}
+
+const TRACK_CELLS = getTrackCells();
+
+// Home column cells per color [list of [r,c] from entry going toward center]
+const HOME_COL_CELLS = {
+  red: [[7,1],[7,2],[7,3],[7,4],[7,5]],
+  green: [[1,7],[2,7],[3,7],[4,7],[5,7]],
+  yellow: [[7,13],[7,12],[7,11],[7,10],[7,9]],
+  blue: [[13,7],[12,7],[11,7],[10,7],[9,7]],
+};
+// Home base piece positions (4 pieces per base)
+const HOME_PIECE_CELLS = {
+  red:[[1,1],[1,4],[4,1],[4,4]],
+  green:[[1,10],[1,13],[4,10],[4,13]],
+  yellow:[[10,1],[10,4],[13,1],[13,4]],
+  blue:[[10,10],[10,13],[13,10],[13,13]],
+};
+
+function renderGame(){
+  if(!gameState) return;
+  // Clear all pieces
+  document.querySelectorAll('.piece,.home-token').forEach(el=>el.remove());
+  // Render each piece
+  Object.values(gameState.pieces).forEach(p=>{
+    placePiece(p);
+  });
+  // Update turn indicator
+  const cur = gameState.current_turn;
+  document.getElementById('turnDot').style.background = COLOR_HEX[cur]||'#fff';
+  const curPlayer = getCurPlayerName();
+  const isMyTurn = cur === myColor;
+  document.getElementById('turnLabel').textContent = isMyTurn ? 'Your Turn' : `${curPlayer}'s Turn`;
+  document.getElementById('diceModeBadge').textContent = gameState.twin_dice ? '🎲🎲 Twin' : '🎲 Normal';
+  renderScoreStrip();
+  // Roll/status buttons
+  const rollBtn = document.getElementById('rollBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  if(isMyTurn && !gameState.dice_rolled){
+    rollBtn.style.display='flex'; statusMsg.style.display='none';
+  } else {
+    rollBtn.style.display='none';
+    statusMsg.style.display='block';
+    statusMsg.textContent = isMyTurn ? 'Pick a piece to move' : `Waiting for ${curPlayer}...`;
+  }
+  // Win
+  if(gameState.winner){
+    showWin(gameState.winner);
+  }
+}
+
+function getCurPlayerName(){
+  // We don't have player names in gameState, use color
+  return gameState.current_turn.charAt(0).toUpperCase()+gameState.current_turn.slice(1);
+}
+
+function placePiece(p){
+  if(p.finished) return;
+  let cell;
+  if(p.pos === -1){
+    const [r,c] = HOME_PIECE_CELLS[p.color][p.index];
+    cell = document.getElementById(`cell_${r}_${c}`);
+    if(!cell) return;
+    const div = document.createElement('div');
+    div.className = `piece piece-${p.color}`;
+    div.id = `piece_${p.color}_${p.index}`;
+    div.textContent = p.index+1;
+    div.onclick = ()=>onPieceClick(p);
+    cell.appendChild(div);
+  } else if(p.pos >= 100){
+    const colIdx = p.pos - 100;
+    const coords = HOME_COL_CELLS[p.color][colIdx];
+    if(!coords) return;
+    const [r,c] = coords;
+    cell = document.getElementById(`cell_${r}_${c}`);
+    if(!cell) return;
+    appendPieceToCell(cell, p);
+  } else {
+    const idx = p.track_pos;
+    if(idx < 0 || idx >= TRACK_CELLS.length) return;
+    const [r,c] = TRACK_CELLS[idx];
+    cell = document.getElementById(`cell_${r}_${c}`);
+    if(!cell) return;
+    appendPieceToCell(cell, p);
+  }
+}
+
+function appendPieceToCell(cell, p){
+  const div = document.createElement('div');
+  div.className = `piece piece-${p.color}`;
+  div.id = `piece_${p.color}_${p.index}`;
+  div.textContent = p.index+1;
+  div.onclick = ()=>onPieceClick(p);
+  cell.appendChild(div);
+}
+
+function renderScoreStrip(){
+  const strip = document.getElementById('scoreStrip');
+  const players = gameState.players;
+  strip.innerHTML = players.map(color=>{
+    const finished = Object.values(gameState.pieces).filter(p=>p.color===color&&p.finished).length;
+    const active = gameState.current_turn===color;
+    return `<div class="score-chip ${active?'active':''}" style="${active?'border-color:'+COLOR_HEX[color]+';':''}">
+      <div style="width:8px;height:8px;border-radius:50%;background:${COLOR_HEX[color]}"></div>
+      <span>${color.charAt(0).toUpperCase()+color.slice(1)}</span>
+      <span style="color:${COLOR_HEX[color]}">${finished}/4 🏁</span>
+    </div>`;
+  }).join('');
+}
+
+// ─── DICE ─────────────────────────────────────────────────────────────────────
+function renderDice(rolls, validMoves, autoPassed){
+  const area = document.getElementById('diceArea');
+  area.innerHTML = '';
+  rolls.forEach((v,i)=>{
+    const die = document.createElement('div');
+    die.className = 'die rolled available';
+    die.id = `die_${i}`;
+    die.innerHTML = `<span>${DICE_FACES[v]}</span><span class="die-label">${v}</span>`;
+    area.appendChild(die);
+  });
+  if(!autoPassed) highlightValidPieces(validMoves);
+}
+function renderDiceAfterMove(remaining, validMoves){
+  const area = document.getElementById('diceArea');
+  const allDice = gameState.dice;
+  area.innerHTML = '';
+  allDice.forEach((v,i)=>{
+    const die = document.createElement('div');
+    const used = !remaining.includes(v);
+    die.className = 'die '+(used?'used':'available');
+    die.id = `die_${i}`;
+    die.innerHTML = `<span>${DICE_FACES[v]}</span><span class="die-label">${v}</span>`;
+    area.appendChild(die);
+  });
+  highlightValidPieces(validMoves);
+}
+function doRoll(){
+  if(gameState.dice_rolled) return;
+  send({action:'roll_dice'});
+}
+
+// ─── PIECE INTERACTION ────────────────────────────────────────────────────────
+let currentValidMoves = [];
+function highlightValidPieces(moves){
+  document.querySelectorAll('.piece').forEach(el=>el.classList.remove('valid-move','selected'));
+  currentValidMoves = moves;
+  if(!moves||!gameState) return;
+  const isMyTurn = gameState.current_turn === myColor;
+  if(!isMyTurn) return;
+  moves.forEach(m=>{
+    const el = document.getElementById(`piece_${m.piece_id}`);
+    if(el) el.classList.add('valid-move');
+  });
+}
+
+function onPieceClick(piece){
+  if(!gameState || gameState.current_turn !== myColor) return;
+  if(!gameState.dice_rolled) return;
+  const pid = `${piece.color}_${piece.index}`;
+  // Get valid moves for this piece
+  const moves = currentValidMoves.filter(m=>m.piece_id===pid);
+  if(!moves.length) return;
+  if(moves.length === 1){
+    // Only one die can be used → confirm move
+    executeMoveWithDie(pid, moves[0].die_val);
+  } else {
+    // Multiple die values available → show chooser
+    showDieModal(pid, moves);
+  }
+}
+
+function showDieModal(pieceId, moves){
+  pendingDieChoicePieceId = pieceId;
+  const choices = document.getElementById('dieChoices');
+  choices.innerHTML = '';
+  moves.forEach(m=>{
+    const div = document.createElement('div');
+    div.className = 'die-choice';
+    div.dataset.val = m.die_val;
+    div.innerHTML = `<span>${DICE_FACES[m.die_val]}</span><small>Move ${m.die_val}</small>`;
+    div.onclick = ()=>{
+      choices.querySelectorAll('.die-choice').forEach(d=>d.classList.remove('sel'));
+      div.classList.add('sel');
+      selectedDieVal = m.die_val;
+    };
+    choices.appendChild(div);
+  });
+  selectedDieVal = null;
+  document.getElementById('dieModal').classList.add('show');
+}
+function closeDieModal(){ document.getElementById('dieModal').classList.remove('show'); }
+function confirmDieChoice(){
+  if(!selectedDieVal || !pendingDieChoicePieceId){ toast('Pick a die first'); return; }
+  closeDieModal();
+  executeMoveWithDie(pendingDieChoicePieceId, selectedDieVal);
+}
+function executeMoveWithDie(pieceId, dieVal){
+  send({action:'move_piece', piece_id: pieceId, die_val: dieVal});
+}
+
+// ─── EVENTS ──────────────────────────────────────────────────────────────────
+function handleMoveEvents(events){
+  events.forEach(ev=>{
+    if(ev.type==='captured'){
+      notify(`💥 Captured ${ev.piece_id.split('_')[0]}!`);
+    }
+    if(ev.type==='finished'){
+      notify(`🏁 ${ev.piece_id.split('_')[0]} piece home!`);
+    }
+    if(ev.type==='winner'){
+      // handled in renderGame
+    }
+  });
+}
+
+// ─── WIN ─────────────────────────────────────────────────────────────────────
+function showWin(color){
+  document.getElementById('winTitle').textContent = color.charAt(0).toUpperCase()+color.slice(1)+' Wins!';
+  document.getElementById('winTitle').style.color = COLOR_HEX[color];
+  document.getElementById('winSub').textContent = color===myColor ? 'You won this round! 🎉' : 'Better luck next time.';
+  document.getElementById('winOverlay').classList.add('show');
+}
+
+// ─── CHAT ─────────────────────────────────────────────────────────────────────
+function sendChat(){
+  const inp = document.getElementById('chatInput');
+  const msg = inp.value.trim();
+  if(!msg) return;
+  send({action:'chat', msg});
+  inp.value = '';
+}
+function appendChat(name, color, msg){
+  const area = document.getElementById('chatArea');
+  const div = document.createElement('div');
+  div.className = 'chat-msg';
+  div.innerHTML = `<span class="chat-name" style="color:${COLOR_HEX[color]||'#fff'}">${name}</span>${msg}`;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+}
+
+// ─── UTILITIES ────────────────────────────────────────────────────────────────
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+function notify(msg){
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'), 2000);
+}
+</script>
+</body>
+</html>
