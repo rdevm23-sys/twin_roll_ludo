@@ -16,6 +16,7 @@ sudo chown ubuntu:ubuntu /opt/twin-roll
 # 3. Copy files (run from project root)
 cp -r backend /opt/twin-roll/
 cp -r frontend /opt/twin-roll/
+cp pom.properties /opt/twin-roll/
 
 # 4. Python virtual environment
 cd /opt/twin-roll

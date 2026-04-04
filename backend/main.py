@@ -487,18 +487,18 @@ async def handle_disconnect(room: Room, player_id: str):
     if not room.players:
         rooms.pop(room.code, None)
 
+@app.get("/pom.properties")
+async def get_pom_properties():
+    pom_path = os.path.join(os.path.dirname(__file__), "..", "pom.properties")
+    if os.path.exists(pom_path):
+        return FileResponse(pom_path)
+    return {"error": "File not found"}
+
 # ── Serve frontend ──────────────────────────────────────────────────────────
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 if os.path.exists(frontend_path):
     app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
-@app.get("/")
-async def serve_index():
-    index = os.path.join(frontend_path, "index.html")
-    if os.path.exists(index):
-        return FileResponse(index)
-    return {"status": "Twin Roll API running"}
-
-@app.get("/health")
-async def health():
-    return {"status": "ok", "rooms": len(rooms)}
+    @app.get("/")
+    async def get_index():
+        return FileResponse(os.path.join(frontend_path, "index.html"))

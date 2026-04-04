@@ -18,6 +18,7 @@
     <div class="dice-anim">🎲🎲</div>
     <h1>Twin Roll</h1>
     <div class="sub">Ludo, Doubled</div>
+    <div id="appVersion" style="font-size:0.75rem;color:var(--muted);margin-top:8px;font-weight:600;"></div>
   </div>
   <div class="home-btns">
     <button class="btn btn-primary" onclick="UI.showScreen('createScreen')">Create Room</button>
@@ -207,6 +208,17 @@
 <script>
   // Boot
   Game.init();
+
+  // Fetch and display version
+  fetch('/pom.properties')
+    .then(r => r.text())
+    .then(text => {
+      const match = text.match(/version=(.+)/);
+      if (match) {
+        document.getElementById('appVersion').textContent = 'v' + match[1].trim();
+      }
+    })
+    .catch(err => console.warn('Could not load version:', err));
 </script>
 
 </body>
