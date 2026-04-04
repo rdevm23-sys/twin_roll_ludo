@@ -1,0 +1,154 @@
+/* ── Board Layout ──────────────────────────────────── */
+.board-wrap {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 4px;
+  background: var(--bg);
+}
+
+.ludo-board {
+  display: grid;
+  grid-template-columns: repeat(15, var(--cell));
+  grid-template-rows: repeat(15, var(--cell));
+  border: 2.5px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 6px 32px var(--shadow);
+  background: #fff;
+}
+
+/* ── Cell Base ─────────────────────────────────────── */
+.cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.5px solid rgba(0,0,0,0.06);
+  overflow: hidden;
+}
+
+/* ── Home Bases ────────────────────────────────────── */
+.home-red    { background: #fdecea; }
+.home-green  { background: #eaf7f0; }
+.home-yellow { background: #fff8e6; }
+.home-blue   { background: #eaf3fb; }
+
+/* Inner home token circles */
+.home-token {
+  width: 62%;
+  height: 62%;
+  border-radius: 50%;
+  border: 2px solid rgba(0,0,0,0.12);
+}
+.home-token-red    { background: radial-gradient(circle at 35% 35%, #ff6b6b, #d62828); }
+.home-token-green  { background: radial-gradient(circle at 35% 35%, #52b788, #2d6a4f); }
+.home-token-yellow { background: radial-gradient(circle at 35% 35%, #ffb703, #e07b00); }
+.home-token-blue   { background: radial-gradient(circle at 35% 35%, #4895ef, #1a5276); }
+
+/* ── Track Cells ───────────────────────────────────── */
+.cell-track { background: #fff; }
+
+.track-red    { background: #fdecea; }
+.track-green  { background: #eaf7f0; }
+.track-yellow { background: #fff8e6; }
+.track-blue   { background: #eaf3fb; }
+
+/* Safe squares */
+.cell-safe {
+  background: #fffde7;
+}
+.cell-safe::after {
+  content: '★';
+  font-size: calc(var(--cell) * 0.38);
+  color: #e07b00;
+  position: absolute;
+  top: 1px;
+  right: 2px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+/* ── Home Column (colored lanes) ───────────────────── */
+.finish-red    { background: #fdecea; }
+.finish-green  { background: #eaf7f0; }
+.finish-yellow { background: #fff8e6; }
+.finish-blue   { background: #eaf3fb; }
+
+/* Center finish */
+.finish-center {
+  background: conic-gradient(
+    #fdecea 0deg 90deg,
+    #eaf7f0 90deg 180deg,
+    #fff8e6 180deg 270deg,
+    #eaf3fb 270deg 360deg
+  );
+}
+
+/* ── Pieces ────────────────────────────────────────── */
+.piece {
+  width: 72%;
+  height: 72%;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,0.6);
+  cursor: pointer;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--cell) * 0.32);
+  font-weight: 800;
+  color: rgba(255,255,255,0.9);
+  transition: transform 0.15s, box-shadow 0.15s;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  font-family: 'Syne', sans-serif;
+}
+.piece:active { transform: scale(0.9); }
+
+.piece-red    { background: radial-gradient(circle at 35% 32%, #ff8080, #c0121f); }
+.piece-green  { background: radial-gradient(circle at 35% 32%, #5ecb8a, #1e5e3a); }
+.piece-yellow { background: radial-gradient(circle at 35% 32%, #ffd060, #c86a00); }
+.piece-blue   { background: radial-gradient(circle at 35% 32%, #6ab8ff, #0e4c8a); }
+
+/* Valid move highlight */
+.piece.valid-move {
+  animation: pulse-piece 0.9s ease-in-out infinite;
+  cursor: pointer;
+  border-color: #fff;
+}
+@keyframes pulse-piece {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(224,123,0,0.8), 0 2px 6px rgba(0,0,0,0.2); transform: scale(1); }
+  50%       { box-shadow: 0 0 0 6px rgba(224,123,0,0.3), 0 2px 6px rgba(0,0,0,0.2); transform: scale(1.08); }
+}
+
+/* Selected piece */
+.piece.selected {
+  box-shadow: 0 0 0 4px #fff, 0 0 0 7px var(--accent);
+  transform: scale(1.15);
+  z-index: 10;
+}
+
+/* Multiple pieces on same cell */
+.pieces-stack {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 1px;
+  padding: 2px;
+}
+.pieces-stack .piece {
+  width: 46%;
+  height: 46%;
+}
+
+/* Finished piece indicator */
+.piece.finished-piece {
+  opacity: 0.4;
+  transform: scale(0.8);
+}
