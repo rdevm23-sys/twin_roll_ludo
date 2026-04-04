@@ -111,8 +111,9 @@
     </div>
     <div class="form-row">
       <label>Room Code</label>
-      <input type="text" id="joinCode" placeholder="ABC123" maxlength="6"
-        style="text-transform:uppercase;letter-spacing:0.2em;font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:800">
+      <input type="text" id="joinCode" placeholder="042" maxlength="3" inputmode="numeric" pattern="[0-9]*"
+        autocomplete="one-time-code"
+        style="letter-spacing:0.25em;font-family:ui-monospace,monospace;font-size:1.35rem;font-weight:700">
     </div>
     <button class="btn btn-primary" onclick="Game.joinRoom()">Join Room</button>
   </div>
@@ -150,7 +151,7 @@
 <!-- ══ WAIT / LOBBY ═════════════════════════════════════ -->
 <div id="waitScreen" class="screen">
   <div class="room-code-card">
-    <div class="room-code" id="displayCode">------</div>
+    <div class="room-code" id="displayCode">---</div>
     <div class="room-code-label">Room Code — Share with friends</div>
     <button class="btn btn-ghost" id="copyCodeBtn" style="margin-top:8px">📋 Copy Code</button>
   </div>

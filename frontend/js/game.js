@@ -125,7 +125,7 @@ const Game = {
 
   _tryRejoin() {
     const path = window.location.pathname;
-    const match = path.match(/^\/game\/([A-Z0-9]{6})$/);
+    const match = path.match(/^\/game\/(\d{3})$/);
     if (match) {
         const code = match[1];
         const stored = JSON.parse(localStorage.getItem('twin-roll-player'));
@@ -166,8 +166,10 @@ const Game = {
 
   joinRoom() {
     const name = document.getElementById('joinName').value.trim() || 'Player';
-    const code = document.getElementById('joinCode').value.toUpperCase().trim();
-    if (!code) { UI.toast('Enter a room code'); return; }
+    const raw = document.getElementById('joinCode').value.trim();
+    const digits = raw.replace(/\D/g, '');
+    const code = digits.length ? digits.slice(-3).padStart(3, '0') : '';
+    if (!code) { UI.toast('Enter a 3-digit room code'); return; }
     WS.connect(() => WS.send({ action: 'join_room', name, code }));
   },
 

@@ -17,8 +17,22 @@ from .models import Room
 
 rooms: dict[str, Room] = {}
 
-def gen_code(n=6):
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=n))
+
+def gen_code(n: int) -> str:
+    return "".join(random.choices(string.ascii_uppercase + string.digits, k=n))
+
+
+def gen_room_code() -> str:
+    """3-digit numeric code (000–999) for quick testing and sharing."""
+    return f"{random.randint(0, 999):03d}"
+
+
+def normalize_room_code(raw: str) -> str:
+    digits = "".join(c for c in (raw or "") if c.isdigit())
+    if not digits:
+        return ""
+    padded = digits.zfill(3)
+    return padded[-3:] if len(padded) > 3 else padded
 
 
 async def websocket_endpoint(ws: WebSocket):
@@ -41,9 +55,9 @@ async def websocket_endpoint(ws: WebSocket):
 
             # ── CREATE ROOM ──
             if action == "create_room":
-                code = gen_code(6)
+                code = gen_room_code()
                 while code in rooms:
-                    code = gen_code(6)
+                    code = gen_room_code()
                 room = Room(
                     code=code,
                     host_id=player_id,
@@ -60,9 +74,11 @@ async def websocket_endpoint(ws: WebSocket):
 
             # ── JOIN ROOM ──
             elif action == "join_room":
-                code = msg.get("code", "").upper()
-                room = rooms.get(code)
-                if not room:
+                code = normalize_room_code(msg.get("code", ""))
+                room = rooms.get(code) if code else None
+                if not code:
+                    await send({"type": "error", "msg": "Enter a 3-digit room code"})
+                elif not room:
                     await send({"type": "error", "msg": "Room not found"})
                 elif room.started:
                     await send({"type": "error", "msg": "Game already started"})
@@ -96,9 +112,9 @@ async def websocket_endpoint(ws: WebSocket):
                     await matched_room.broadcast({"type": "player_joined", "players": matched_room.player_list(), "name": name}, exclude=player_id)
                 else:
                     # Create a public room
-                    code = gen_code(6)
+                    code = gen_room_code()
                     while code in rooms:
-                        code = gen_code(6)
+                        code = gen_room_code()
                     room = Room(code=code, host_id=player_id, host_name=name,
                                 max_players=desired_players, twin_dice=twin_dice, is_public=True)
                     rooms[code] = room
@@ -109,9 +125,9 @@ async def websocket_endpoint(ws: WebSocket):
 
             # ── START SINGLE PLAYER ──
             elif action == "start_single_player":
-                code = gen_code(6)
+                code = gen_room_code()
                 while code in rooms:
-                    code = gen_code(6)
+                    code = gen_room_code()
                 room = Room(
                     code=code,
                     host_id=player_id,
@@ -132,9 +148,9 @@ async def websocket_endpoint(ws: WebSocket):
                 await send({"type": "game_start", "game": room.game, "players": room.player_list(), "your_color": color, "your_id": player_id})
             # ── REJOIN ROOM ──
             elif action == "rejoin_room":
-                code = msg.get("code", "").upper()
+                code = normalize_room_code(msg.get("code", ""))
                 pid_to_rejoin = msg.get("player_id")
-                room = rooms.get(code)
+                room = rooms.get(code) if code else None
 
                 if room and pid_to_rejoin in room.players and room.players[pid_to_rejoin].get('ws') is None:
                     current_room = room
@@ -144,7 +160,13 @@ async def websocket_endpoint(ws: WebSocket):
 
                     await send({**room.full_state(), "your_id": pid_to_rejoin, "your_color": player_data['color']})
                     if room.game:
-                        await send({"type": "game_state_full", "game": room.game, "players": room.player_list()})
+                        await send({
+                            "type": "game_state_full",
+                            "game": room.game,
+                            "players": room.player_list(),
+                            "your_id": pid_to_rejoin,
+                            "your_color": player_data["color"],
+                        })
                     await room.broadcast({"type": "player_reconnected", "player_id": pid_to_rejoin, "players": room.player_list()}, exclude=pid_to_rejoin)
                 else:
                     await send({"type": "error", "msg": "Could not rejoin room."})
@@ -164,11 +186,17 @@ async def websocket_endpoint(ws: WebSocket):
                         colors = [current_room.players[pid]["color"] for pid in player_pids]
                         current_room.game = init_game_state(colors, "multiplayer", current_room.twin_dice)
                         current_room.started = True
-                        await current_room.broadcast({
-                            "type": "game_start",
-                            "game": current_room.game,
-                            "players": current_room.player_list(),
-                        })
+                        pl = current_room.player_list()
+                        base = {"type": "game_start", "game": current_room.game, "players": pl}
+                        for pid, pdata in list(current_room.players.items()):
+                            pws = pdata.get("ws")
+                            if not pws:
+                                continue
+                            try:
+                                payload = {**base, "your_id": pid, "your_color": pdata["color"]}
+                                await pws.send_text(json.dumps(payload))
+                            except Exception:
+                                pass
 
             # ── ROLL DICE ──
             elif action == "roll_dice":
