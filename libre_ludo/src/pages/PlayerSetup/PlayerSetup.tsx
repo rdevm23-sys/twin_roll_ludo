@@ -8,7 +8,6 @@ import { useCleanup } from '../../hooks/useCleanup';
 import { playerCountToWord } from '../../game/players/logic';
 import { playerSequences } from '../../game/players/constants';
 import bg from '../../assets/bg.jpg';
-import GitHubButton from 'react-github-btn';
 import HomeIcon from '../../assets/icons/home.svg?react';
 import styles from './PlayerSetup.module.css';
 import { Tooltip } from 'react-tooltip';
@@ -132,16 +131,6 @@ function PlayerSetup() {
       <Link to="/" className={styles.goToHome}>
         <HomeIcon />
       </Link>
-      <div style={{ position: 'absolute', top: 0, right: 0 }}>
-        <GitHubButton
-          href="https://github.com/priyanshurav"
-          data-color-scheme="no-preference: light; light: light; dark: dark;"
-          data-size="large"
-          aria-label="Follow @priyanshurav on GitHub"
-        >
-          Follow @priyanshurav
-        </GitHubButton>
-      </div>
       <ToastContainer position="top-center" />
       <Tooltip
         id="bot-status-tooltip"

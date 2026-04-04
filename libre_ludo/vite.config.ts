@@ -7,7 +7,6 @@ import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { VitePWA } from 'vite-plugin-pwa';
 import { pwaOptions } from './pwa.config';
-import { license } from './package.json';
 import { normalizePath } from 'vite';
 import path from 'node:path';
 import fs from 'fs';
@@ -34,7 +33,7 @@ export default defineConfig({
   },
   define: {
     __APP_VERSION__: JSON.stringify(version),
-    __APP_LICENSE__: JSON.stringify(license),
+    __APP_LICENSE__: JSON.stringify('MIT'),
   },
   plugins: [
     react(),
@@ -56,7 +55,7 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: normalizePath(path.resolve(__dirname, 'LICENSE')),
+          src: normalizePath(path.resolve(__dirname, '..', 'LICENSE')),
           dest: normalizePath(path.resolve(__dirname, 'dist')),
           rename: 'LICENSE.txt',
         },
