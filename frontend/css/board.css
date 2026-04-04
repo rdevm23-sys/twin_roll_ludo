@@ -42,10 +42,10 @@
   border-radius: 50%;
   border: 2px solid rgba(0,0,0,0.12);
 }
-.home-token-red    { background: radial-gradient(circle at 35% 35%, #ff5555, #cc0000); }
-.home-token-green  { background: radial-gradient(circle at 35% 35%, #33dd66, #118833); }
-.home-token-yellow { background: radial-gradient(circle at 35% 35%, #ffd040, #cc7700); }
-.home-token-blue   { background: radial-gradient(circle at 35% 35%, #44aaff, #0055cc); }
+.home-token-red    { background: radial-gradient(circle at 35% 35%, #E57373, #B71C1C); }
+.home-token-green  { background: radial-gradient(circle at 35% 35%, #66BB6A, #1B5E20); }
+.home-token-yellow { background: radial-gradient(circle at 35% 35%, #FFEE58, #F9A825); }
+.home-token-blue   { background: radial-gradient(circle at 35% 35%, #42A5F5, #0D47A1); }
 
 /* ── Track Cells ───────────────────────────────────── */
 .cell-track { background: #fff; }
@@ -66,6 +66,10 @@
 }
 
 /* ── Home Column (colored lanes) ───────────────────── */
+.finish-red, .finish-green, .finish-yellow, .finish-blue {
+  border: 1px solid rgba(0,0,0,0.2);
+  position: relative;
+}
 .finish-red    { background: #ffcccc; }
 .finish-green  { background: #c0f0cc; }
 .finish-yellow { background: #ffe8a0; }
@@ -73,17 +77,20 @@
 
 /* Center finish */
 .finish-center {
-  background: radial-gradient(circle, #fff 30%, #f0f0f0 70%);
-  border: 2px solid #666;
+  background: radial-gradient(circle at 30% 30%, #ffd700 0%, #ffed4e 50%, #fff 100%);
+  border: 3px solid #b8860b;
+  border-radius: 4px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
   position: relative;
 }
 .finish-center::after {
-  content: '🏁';
+  content: '🏆';
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 1.2em;
+  font-size: 1.4em;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
 }
 
 /* ── Pieces ────────────────────────────────────────── */
@@ -102,10 +109,10 @@
 }
 .piece:active { transform: scale(0.9); }
 
-.piece-red    { background: radial-gradient(circle at 35% 32%, #ff5555, #cc0000); }
-.piece-green  { background: radial-gradient(circle at 35% 32%, #33dd66, #118833); }
-.piece-yellow { background: radial-gradient(circle at 35% 32%, #ffd040, #cc7700); }
-.piece-blue   { background: radial-gradient(circle at 35% 32%, #44aaff, #0055cc); }
+.piece-red    { background: radial-gradient(circle at 35% 32%, #E57373, #B71C1C); }
+.piece-green  { background: radial-gradient(circle at 35% 32%, #66BB6A, #1B5E20); }
+.piece-yellow { background: radial-gradient(circle at 35% 32%, #FFEE58, #F9A825); }
+.piece-blue   { background: radial-gradient(circle at 35% 32%, #42A5F5, #0D47A1); }
 
 /* Valid move highlight */
 .piece.valid-move {

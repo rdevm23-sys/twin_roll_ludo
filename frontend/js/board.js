@@ -55,19 +55,6 @@ const Board = {
         const cell = document.createElement('div');
         cell.className = 'cell ' + grid[r][c];
         cell.id = `cell_${r}_${c}`;
-        
-        // Add inner home token circles at piece starting positions
-        for (const [color, positions] of Object.entries(HOME_PIECE_POSITIONS)) {
-          for (const [pr, pc] of positions) {
-            if (pr === r && pc === c) {
-              const token = document.createElement('div');
-              token.className = `home-token home-token-${color}`;
-              cell.appendChild(token);
-              break;
-            }
-          }
-        }
-        
         board.appendChild(cell);
       }
     }
@@ -181,6 +168,40 @@ const Board = {
       if (!renderedPieceIds.has(el.id)) {
         el.remove();
       }
+    });
+
+    // Render home token circles for empty home positions
+    Object.entries(HOME_PIECE_POSITIONS).forEach(([color, positions]) => {
+      positions.forEach(([r, c]) => {
+        const cellKey = `${r}_${c}`;
+        const hasPiece = cellMap[cellKey] && cellMap[cellKey].length > 0;
+        
+        if (!hasPiece) {
+          const circleId = `home_circle_${color}_${positions.indexOf([r, c])}`;
+          let circleEl = document.getElementById(circleId);
+          
+          if (!circleEl) {
+            circleEl = document.createElement('div');
+            circleEl.className = `home-token home-token-${color}`;
+            circleEl.id = circleId;
+            overlay.appendChild(circleEl);
+          }
+          
+          const top = r * cellSize + boardOffsetY;
+          const left = c * cellSize + boardOffsetX;
+          const centerOffset = (cellSize - cellSize * 0.62) / 2; // Match CSS .home-token width
+          
+          circleEl.style.width = `${cellSize * 0.62}px`;
+          circleEl.style.height = `${cellSize * 0.62}px`;
+          circleEl.style.top = `${top + centerOffset}px`;
+          circleEl.style.left = `${left + centerOffset}px`;
+        } else {
+          // Remove circle if piece is now present
+          const circleId = `home_circle_${color}_${positions.indexOf([r, c])}`;
+          const circleEl = document.getElementById(circleId);
+          if (circleEl) circleEl.remove();
+        }
+      });
     });
   },
 

@@ -107,6 +107,29 @@ async def websocket_endpoint(ws: WebSocket):
                     current_room = room
                     await send({**room.full_state(), "your_color": color, "your_id": player_id, "type": "waiting_for_players"})
 
+            # ── START SINGLE PLAYER ──
+            elif action == "start_single_player":
+                code = gen_code(6)
+                while code in rooms:
+                    code = gen_code(6)
+                room = Room(
+                    code=code,
+                    host_id=player_id,
+                    host_name=msg.get("name", "Player"),
+                    max_players=1, # Single player
+                    twin_dice=False, # Default to normal dice for single player
+                    is_public=False,
+                )
+                rooms[code] = room
+                color = room.assign_color()
+                room.players[player_id] = {"ws": ws, "name": msg.get("name","Player"), "color": color, "ready": True} # Auto-ready
+                current_room = room
+
+                # Immediately start the game for single player
+                colors = [color] # Only one player's color
+                room.game = init_game_state(colors, "singleplayer", room.twin_dice)
+                room.started = True
+                await send({"type": "game_start", "game": room.game, "players": room.player_list(), "your_color": color, "your_id": player_id})
             # ── REJOIN ROOM ──
             elif action == "rejoin_room":
                 code = msg.get("code", "").upper()
