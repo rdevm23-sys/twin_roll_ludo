@@ -69,20 +69,6 @@ const Board = {
     this._fillRect(g, 9, 0, 6, 6, 'home-yellow');
     this._fillRect(g, 9, 9, 6, 6, 'home-blue');
 
-    // Center - color based on position
-    // Top row (red arm)
-    g[6][6] = 'finish-red';
-    g[6][7] = 'finish-red'; 
-    g[6][8] = 'finish-green'; // corner
-    // Middle row
-    g[7][6] = 'finish-blue'; // left
-    g[7][7] = 'finish-center'; // center
-    g[7][8] = 'finish-green'; // right
-    // Bottom row (yellow arm)
-    g[8][6] = 'finish-blue'; // corner
-    g[8][7] = 'finish-yellow';
-    g[8][8] = 'finish-yellow';
-
     // Home columns
     HOME_COL_CELLS.red.forEach(([r,c])    => g[r][c] = 'finish-red');
     HOME_COL_CELLS.green.forEach(([r,c])  => g[r][c] = 'finish-green');
@@ -97,6 +83,18 @@ const Board = {
         g[r][c] = 'cell-track';
       }
     });
+
+    // Center winning area (3×3): apply after track so cells like [6,8] are not overwritten.
+    // Red west [7,5]→, green north [5,7]↓, yellow east ←[7,9], blue south ↑[9,7].
+    g[6][6] = 'finish-red';
+    g[6][7] = 'finish-green';
+    g[6][8] = 'finish-yellow';
+    g[7][6] = 'finish-red';
+    g[7][7] = 'finish-center';
+    g[7][8] = 'finish-yellow';
+    g[8][6] = 'finish-blue';
+    g[8][7] = 'finish-blue';
+    g[8][8] = 'finish-yellow';
 
     return g;
   },
