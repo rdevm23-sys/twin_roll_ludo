@@ -7,9 +7,16 @@ import { ViteImageOptimizer } from 'vite-plugin-image-optimizer';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { VitePWA } from 'vite-plugin-pwa';
 import { pwaOptions } from './pwa.config';
-import { version, license } from './package.json';
+import { license } from './package.json';
 import { normalizePath } from 'vite';
 import path from 'node:path';
+import fs from 'fs';
+
+// Read version from pom.properties
+const pomPath = path.resolve(__dirname, '..', 'pom.properties');
+const pomContent = fs.readFileSync(pomPath, 'utf-8');
+const versionLine = pomContent.split('\n').find(line => line.startsWith('version='));
+const version = versionLine ? versionLine.split('=')[1] : 'unknown';
 
 // https://vite.dev/config/
 export default defineConfig({

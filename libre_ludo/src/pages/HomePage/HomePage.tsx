@@ -3,13 +3,15 @@ import clsx from 'clsx';
 import styles from './HomePage.module.css';
 
 function HomePage() {
+  const version = __APP_VERSION__;
+
   return (
     <div className={styles.pageContainer}>
       <main className={styles.homePage}>
         <section className={styles.welcome}>
           <h1 className={styles.title}>
             Twin Roll
-            <small className={styles.version}>v1.0.4</small>
+            <small className={styles.version}>v{version}</small>
           </h1>
           <div className={styles.diceSet}>
             <span className={styles.dice}>⚀</span>
