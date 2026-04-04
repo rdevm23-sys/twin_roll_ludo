@@ -9,6 +9,13 @@
   <link rel="stylesheet" href="/static/css/base.css">
   <link rel="stylesheet" href="/static/css/board.css">
   <link rel="stylesheet" href="/static/css/ui.css">
+  <style>
+    .board-wrap { position: relative; }
+    #pieces-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+    #pieces-overlay .piece { position: absolute; transition: top 0.4s ease-in-out, left 0.4s ease-in-out; pointer-events: auto; }
+    .game-topbar { display: flex; align-items: center; justify-content: space-between; }
+    .btn-icon { background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0 8px; color: var(--muted); line-height: 1; }
+  </style>
 </head>
 <body>
 
@@ -141,7 +148,8 @@
       <div class="turn-color-dot" id="turnDot"></div>
       <span id="turnLabel">Waiting...</span>
     </div>
-    <div class="mode-tag" id="diceModeBadge">🎲 Normal</div>
+    <div class="mode-tag" id="diceModeBadge" style="margin-left: auto; margin-right: 8px;">🎲 Normal</div>
+    <button class="btn-icon" onclick="Game.leaveGame()" title="Leave Game">🚪</button>
   </div>
 
   <!-- Score strip -->
@@ -150,6 +158,7 @@
   <!-- Board -->
   <div class="board-wrap">
     <div class="ludo-board" id="ludoBoard"></div>
+    <div id="pieces-overlay"></div>
   </div>
 
   <!-- Dice panel -->

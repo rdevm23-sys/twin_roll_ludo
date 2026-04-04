@@ -300,10 +300,13 @@ const Game = {
       location.reload();
     }
   },
+
+  sendChat() {
     const inp = document.getElementById('chatInput');
     const msg = inp.value.trim();
-    if (!msg) return;
-    WS.send({ action: 'chat', msg });
-    inp.value = '';
+    if (msg) {
+      WS.send({ action: 'chat', msg: msg });
+      inp.value = '';
+    }
   },
 };

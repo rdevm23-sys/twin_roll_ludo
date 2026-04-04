@@ -98,78 +98,81 @@ const Board = {
 
   // Clear all piece elements from board
   clearPieces() {
-    document.querySelectorAll('.piece, .home-token').forEach(el => el.remove());
+    const overlay = document.getElementById('pieces-overlay');
+    if (overlay) overlay.innerHTML = '';
   },
 
   // Render all pieces from game state
   renderPieces(gameState, myColor, validMoves) {
-    this.clearPieces();
+    const overlay = document.getElementById('pieces-overlay');
+    const boardEl = document.getElementById('ludoBoard');
+    if (!overlay || !boardEl) return;
 
-    // Group pieces by cell
-    const cellMap = {}; // cellKey -> [piece]
+    const boardRect = boardEl.getBoundingClientRect();
+    const cellSize = boardRect.width / 15;
 
-    Object.values(gameState.pieces).forEach(p => {
-      if (p.finished) return;
-      const key = this._getCellKey(p);
-      if (!key) return;
-      if (!cellMap[key]) cellMap[key] = [];
-      cellMap[key].push(p);
+    const renderedPieceIds = new Set();
+    const cellMap = this._getPiecePositions(gameState);
+
+    Object.entries(cellMap).forEach(([cellKey, pieces]) => {
+      if (cellKey === 'finished') return;
+
+      const [r, c] = cellKey.split('_').map(Number);
+      const top = r * cellSize;
+      const left = c * cellSize;
+
+      pieces.forEach((p, stackIndex) => {
+        const pieceId = `piece_${p.color}_${p.index}`;
+        renderedPieceIds.add(pieceId);
+
+        let el = document.getElementById(pieceId);
+        if (!el) {
+          el = this._createPieceEl(p);
+          overlay.appendChild(el);
+        }
+
+        const isValid = myColor && validMoves && validMoves.some(m => m.piece_id === `${p.color}_${p.index}`);
+        el.classList.toggle('valid-move', isValid);
+
+        const stackOffset = pieces.length > 1 ? (stackIndex - (pieces.length - 1) / 2) * 4 : 0;
+        const pieceSize = el.offsetWidth || cellSize * 0.8;
+        const centerOffset = (cellSize - pieceSize) / 2;
+
+        el.style.top = `${top + centerOffset + stackOffset}px`;
+        el.style.left = `${left + centerOffset + stackOffset}px`;
+      });
     });
 
-    // Also render home base tokens for pieces still at home
-    Object.values(gameState.pieces).forEach(p => {
-      if (p.finished || p.pos !== -1) return;
-      const [r, c] = HOME_PIECE_POSITIONS[p.color][p.index];
-      const cell = document.getElementById(`cell_${r}_${c}`);
-      if (!cell) return;
-      const el = this._createPieceEl(p, myColor, validMoves);
-      cell.appendChild(el);
-    });
-
-    // Render pieces on track / home column
-    Object.entries(cellMap).forEach(([key, pieces]) => {
-      if (key.startsWith('home_')) return; // handled above
-      const [r, c] = key.split('_').map(Number);
-      const cell = document.getElementById(`cell_${r}_${c}`);
-      if (!cell) return;
-
-      if (pieces.length === 1) {
-        cell.appendChild(this._createPieceEl(pieces[0], myColor, validMoves));
-      } else {
-        const stack = document.createElement('div');
-        stack.className = 'pieces-stack';
-        pieces.forEach(p => stack.appendChild(this._createPieceEl(p, myColor, validMoves)));
-        cell.appendChild(stack);
+    overlay.querySelectorAll('.piece').forEach(el => {
+      if (!renderedPieceIds.has(el.id)) {
+        el.remove();
       }
     });
   },
 
-  _getCellKey(p) {
-    if (p.pos === -1) return `home_${p.color}_${p.index}`;
-    if (p.pos >= 100) {
-      const colIdx = p.pos - 100;
-      const coords = HOME_COL_CELLS[p.color][colIdx];
-      if (!coords) return null;
-      return `${coords[0]}_${coords[1]}`;
-    }
-    const coords = TRACK_CELLS[p.track_pos];
-    if (!coords) return null;
-    return `${coords[0]}_${coords[1]}`;
+  _getPiecePositions(gameState) {
+    const cellMap = {};
+    Object.values(gameState.pieces).forEach(p => {
+      if (p.finished) return;
+      let coords;
+      if (p.pos === -1) coords = HOME_PIECE_POSITIONS[p.color][p.index];
+      else if (p.pos >= 100) coords = HOME_COL_CELLS[p.color][p.pos - 100];
+      else coords = TRACK_CELLS[p.track_pos];
+
+      if (coords) {
+        const key = `${coords[0]}_${coords[1]}`;
+        if (!cellMap[key]) cellMap[key] = [];
+        cellMap[key].push(p);
+      }
+    });
+    return cellMap;
   },
 
-  _createPieceEl(p, myColor, validMoves) {
+  _createPieceEl(p) {
     const el = document.createElement('div');
     el.className = `piece piece-${p.color}`;
     el.id = `piece_${p.color}_${p.index}`;
-    el.textContent = p.index + 1;
-
-    // Highlight valid moves
-    if (myColor && validMoves) {
-      const pid = `${p.color}_${p.index}`;
-      const isValid = validMoves.some(m => m.piece_id === pid);
-      if (isValid) el.classList.add('valid-move');
-    }
-
+    el.innerHTML = `<span>${p.index + 1}</span>`;
     el.addEventListener('click', () => Game.onPieceClick(p));
     return el;
   },
