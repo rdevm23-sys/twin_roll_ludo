@@ -25,6 +25,15 @@
   margin-bottom: 0.3em;
 }
 
+.welcome h1 small {
+  display: block;
+  font-size: 0.18em;
+  color: #777;
+  margin-top: 0.3em;
+  font-weight: normal;
+  letter-spacing: 0.03em;
+}
+
 .welcome h1 span {
   color: var(--color-primary);
 }

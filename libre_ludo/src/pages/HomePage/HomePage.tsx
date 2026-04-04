@@ -15,7 +15,7 @@ function HomePage() {
           <p>Roll the dice, compete with friends, and send your tokens home first.</p>
           <nav className={styles.ctaButtons}>
             <Link className={clsx(styles.ctaButton, styles.playNowBtn)} to="/setup">
-              🔥 Play Now!
+              Play Now!
             </Link>
           </nav>
         </section>
