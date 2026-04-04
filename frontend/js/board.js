@@ -82,8 +82,19 @@ const Board = {
     this._fillRect(g, 9, 0, 6, 6, 'home-yellow');
     this._fillRect(g, 9, 9, 6, 6, 'home-blue');
 
-    // Center
-    this._fillRect(g, 6, 6, 3, 3, 'finish-center');
+    // Center - color based on position
+    // Top row (red arm)
+    g[6][6] = 'finish-red';
+    g[6][7] = 'finish-red'; 
+    g[6][8] = 'finish-green'; // corner
+    // Middle row
+    g[7][6] = 'finish-blue'; // left
+    g[7][7] = 'finish-center'; // center
+    g[7][8] = 'finish-green'; // right
+    // Bottom row (yellow arm)
+    g[8][6] = 'finish-blue'; // corner
+    g[8][7] = 'finish-yellow';
+    g[8][8] = 'finish-yellow';
 
     // Home columns
     HOME_COL_CELLS.red.forEach(([r,c])    => g[r][c] = 'finish-red');
