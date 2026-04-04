@@ -9,15 +9,25 @@ function HomePage() {
     <div className={styles.pageContainer}>
       <main className={styles.homePage}>
         <section className={styles.welcome}>
+          <p className={styles.badge}>Multiplayer Ludo</p>
           <h1 className={styles.title}>
-            🎲🎲 Twin Roll
+            <span className={styles.titleStack}>
+              <span className={styles.titleRow}>
+                <span className={styles.titleDice} aria-hidden>
+                  🎲
+                </span>
+                <span className={styles.titleWord}>Twin</span>
+              </span>
+              <span className={styles.titleRow}>
+                <span className={styles.titleDice} aria-hidden>
+                  🎲
+                </span>
+                <span className={styles.titleWord}>Roll</span>
+              </span>
+            </span>
             <small className={styles.version}>v{version}</small>
           </h1>
-          <div className={styles.diceSet}>
-            <span className={styles.dice}>⚀</span>
-            <span className={styles.dice}>⚄</span>
-          </div>
-          <p>Two dice. One board. Start the game.</p>
+          <p className={styles.tagline}>Two dice. One board. Your move.</p>
           <nav className={styles.ctaButtons}>
             <Link className={clsx(styles.ctaButton, styles.playNowBtn)} to="/setup">
               Play Now!

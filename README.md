@@ -1,101 +1,96 @@
-####
-
-Faeture to be developed. We need to count number of cuts one is making per game.
-
-
-
 # Twin Roll — Multiplayer Ludo
-# Testing CICD
-Real-time multiplayer Ludo with a **Twin Dice** mode. Mobile-first, WebSocket-based, self-hosted.
+
+Real-time multiplayer Ludo with **Twin Dice** mode. Mobile-first, WebSocket-based, self-hosted (for example on Oracle Cloud Free Tier).
 
 ## Features
+
 - **2 or 4 player** real-time multiplayer via WebSockets
 - **Normal mode** (1 die) or **Twin Dice mode** (2 dice, use any combo freely)
-- **Private rooms** — join by 6-char code
+- **Private rooms** — join by 6-character code
 - **Public matchmaking** — auto-match with strangers
 - **In-game chat**
-- Mobile-first UI, works in any mobile browser
+- Mobile-first UI
 - Full Ludo rules: captures, safe squares, home column, 6-to-enter
 
-## Project Structure
+## Project structure
+
 ```
-twin-roll/
-├── backend/
-│   ├── main.py          # FastAPI + WebSocket game server
-│   └── requirements.txt
-├── frontend/
-│   └── index.html       # Single-file game client
-└── deploy/
-    ├── deploy.sh        # Oracle Free Tier setup script
-    ├── nginx.conf       # Nginx reverse proxy with WS support
-    └── twin-roll.service # Systemd service
+├── backend/           # FastAPI + WebSocket game server
+├── libre_ludo/        # React + Vite SPA (built to libre_ludo/dist)
+├── deploy/            # deploy.sh, nginx.conf, twin-roll.service
+└── pom.properties     # Version metadata
 ```
 
-## Local Development
+Production static files are served from **`libre_ludo/dist`** (built with `npm run build` inside `libre_ludo/`).
+
+## Local development
+
+**Backend** (from the repository root):
 
 ```bash
-cd backend
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
-uvicorn main:app --reload --port 8000
-# Open frontend/index.html in browser
-# Or visit http://localhost:8000
+pip install -r backend/requirements.txt
+uvicorn backend.main:app --reload --port 8000
 ```
 
-## Oracle Free Tier Deployment
+**Frontend (Vite dev server):**
+
+```bash
+cd libre_ludo
+npm ci
+npm run dev
+```
+
+With a built `libre_ludo/dist`, the backend can also serve the SPA at `http://localhost:8000`.
+
+## Oracle Free Tier deployment
 
 ### Prerequisites
-- Oracle Cloud Always Free VM (Ubuntu 22.04, 1 OCPU, 1 GB RAM is enough)
+
+- Oracle Cloud Always Free VM (Ubuntu 22.04; 1 OCPU / 1 GB RAM is enough)
 - SSH access to the VM
 
 ### Steps
 
 ```bash
-# On your local machine — copy project to Oracle VM
-scp -r twin-roll/ ubuntu@YOUR_VM_IP:~/
+# From your machine — copy the project to the VM
+scp -r . ubuntu@YOUR_VM_IP:~/
 
-# SSH into VM
 ssh ubuntu@YOUR_VM_IP
-
-# Run deploy script
-cd ~/twin-roll
+cd ludo   # or your clone directory
 bash deploy/deploy.sh
 ```
 
-### Oracle Cloud Console — Required Steps
-1. Go to **Networking → Virtual Cloud Networks → Security Lists**
-2. Add **Ingress Rules** for:
-   - TCP port **80** (HTTP)
-   - TCP port **443** (HTTPS)
-3. (Optional) Point a domain to your VM's IP
+### Oracle Cloud console
 
-### Enable HTTPS (recommended for WSS)
+1. **Networking → VCN → Security Lists** — add ingress for TCP **80**, **443**, and **8000** if you proxy/debug the API directly.
+
+### HTTPS (recommended for WSS)
+
 ```bash
 sudo certbot --nginx -d yourdomain.com
 ```
-Then uncomment the HTTPS block in `/etc/nginx/sites-available/twin-roll`.
 
-### Service Commands
+Then uncomment the HTTPS block in `/etc/nginx/sites-available/twin-roll` if your template uses it.
+
+### Service commands
+
 ```bash
-sudo systemctl status twin-roll    # Check status
-sudo systemctl restart twin-roll   # Restart
-sudo journalctl -u twin-roll -f    # Live logs
+sudo systemctl status twin-roll
+sudo systemctl restart twin-roll
+sudo journalctl -u twin-roll -f
 ```
 
-## Twin Dice Rules
-When Twin Dice mode is enabled:
-- Both dice sets roll simultaneously each turn
-- The player can freely use the dice values in any combination:
-  - Move one piece using die 1, another piece using die 2
-  - Move one piece using die 1 only
-  - Move one piece using die 2 only
-  - Move one piece using die 1 + die 2 (combined) — if valid
-- A 6 on either die allows entering a piece from home base
-- Getting a 6 earns an extra turn (after using both dice)
+## Twin Dice rules
 
-## Tech Stack
-- **Backend**: Python 3.11, FastAPI, Uvicorn, WebSockets (no Redis needed)
-- **Frontend**: Vanilla JS, single HTML file, Google Fonts
-- **Server**: Nginx reverse proxy, systemd process manager
-- **Hosting**: Oracle Cloud Free Tier (Always Free VM)
+When Twin Dice mode is enabled:
+
+- Both dice roll each turn; you may use values in any combination on valid moves.
+- A 6 on either die allows entering from home; a 6 still grants an extra turn after both dice are used.
+
+## Tech stack
+
+- **Backend**: Python 3, FastAPI, Uvicorn, WebSockets
+- **Frontend**: React, Vite, TypeScript (LibreLudo-based UI)
+- **Server**: Nginx reverse proxy, systemd

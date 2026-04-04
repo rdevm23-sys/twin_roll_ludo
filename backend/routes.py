@@ -10,13 +10,3 @@ async def get_pom_properties():
     if os.path.exists(pom_path):
         return FileResponse(pom_path)
     return {"error": "File not found"}
-
-@router.get("/")
-async def get_index():
-    frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
-    return FileResponse(os.path.join(frontend_path, "index.html"))
-
-@router.get("/game/{code}")
-async def get_game_index(code: str):
-    frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
-    return FileResponse(os.path.join(frontend_path, "index.html"))
