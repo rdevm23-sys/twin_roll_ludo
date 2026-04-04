@@ -7,12 +7,15 @@ function HomePage() {
     <div className={styles.pageContainer}>
       <main className={styles.homePage}>
         <section className={styles.welcome}>
-          <h1>
+          <h1 className={styles.title}>
             Twin Roll
-            <br />
-            <small>Version 1.0.4</small>
+            <small className={styles.version}>v1.0.4</small>
           </h1>
-          <p>Roll the dice, compete with friends, and send your tokens home first.</p>
+          <div className={styles.diceSet}>
+            <span className={styles.dice}>⚀</span>
+            <span className={styles.dice}>⚄</span>
+          </div>
+          <p>Two dice. One board. Start the game.</p>
           <nav className={styles.ctaButtons}>
             <Link className={clsx(styles.ctaButton, styles.playNowBtn)} to="/setup">
               Play Now!
