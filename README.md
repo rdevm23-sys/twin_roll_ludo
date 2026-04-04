@@ -4,7 +4,7 @@ Faeture to be developed. We need to count number of cuts one is making per game.
 
 
 
-# 🎲🎲 Twin Roll — Multiplayer Ludo
+# Twin Roll — Multiplayer Ludo
 # Testing CICD
 Real-time multiplayer Ludo with a **Twin Dice** mode. Mobile-first, WebSocket-based, self-hosted.
 

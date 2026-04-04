@@ -10,7 +10,7 @@ function HomePage() {
       <main className={styles.homePage}>
         <section className={styles.welcome}>
           <h1 className={styles.title}>
-            Twin Roll
+            🎲🎲 Twin Roll
             <small className={styles.version}>v{version}</small>
           </h1>
           <div className={styles.diceSet}>
