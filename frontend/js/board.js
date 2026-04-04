@@ -55,6 +55,19 @@ const Board = {
         const cell = document.createElement('div');
         cell.className = 'cell ' + grid[r][c];
         cell.id = `cell_${r}_${c}`;
+        
+        // Add inner home token circles at piece starting positions
+        for (const [color, positions] of Object.entries(HOME_PIECE_POSITIONS)) {
+          for (const [pr, pc] of positions) {
+            if (pr === r && pc === c) {
+              const token = document.createElement('div');
+              token.className = `home-token home-token-${color}`;
+              cell.appendChild(token);
+              break;
+            }
+          }
+        }
+        
         board.appendChild(cell);
       }
     }
