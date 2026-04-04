@@ -1,9 +1,13 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LoadingScreen from './components/LoadingScreen/LoadingScreen.tsx';
 import HomePage from './pages/HomePage/HomePage.tsx';
 import NotFound from './pages/NotFound/NotFound.tsx';
 import ErrorBoundary from './pages/ErrorBoundary/ErrorBoundary.tsx';
+import LoginPage from './pages/LoginPage/LoginPage.tsx';
+import SignupPage from './pages/SignupPage/SignupPage.tsx';
 import { lazy, Suspense, type LazyExoticComponent, type ReactElement } from 'react';
+import { useSelector } from 'react-redux';
+import type { RootState } from './state/store';
 
 const Play = lazy(() => import('./pages/Play/Play.tsx'));
 const PlayerSetup = lazy(() => import('./pages/PlayerSetup/PlayerSetup.tsx'));
@@ -15,6 +19,17 @@ const wrapWithSuspense = (Component: LazyExoticComponent<() => ReactElement>) =>
   </Suspense>
 );
 
+// Protected route component for authenticated users only
+function ProtectedRoute({ children }: { children: ReactElement }) {
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return children;
+}
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -25,16 +40,36 @@ export const router = createBrowserRouter([
         element: <HomePage />,
       },
       {
+        path: '/login',
+        element: <LoginPage />,
+      },
+      {
+        path: '/signup',
+        element: <SignupPage />,
+      },
+      {
         path: '/play',
-        element: wrapWithSuspense(Play),
+        element: (
+          <ProtectedRoute>
+            {wrapWithSuspense(Play)}
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/setup',
-        element: wrapWithSuspense(PlayerSetup),
+        element: (
+          <ProtectedRoute>
+            {wrapWithSuspense(PlayerSetup)}
+          </ProtectedRoute>
+        ),
       },
       {
         path: '/online',
-        element: wrapWithSuspense(OnlinePage),
+        element: (
+          <ProtectedRoute>
+            {wrapWithSuspense(OnlinePage)}
+          </ProtectedRoute>
+        ),
       },
       {
         path: '*',
