@@ -15,12 +15,16 @@ const Game = {
   init() {
     this._bindWS();
     this._bindUI();
+    if (WS.ws) {
+      this._tryRejoin();
+    }
   },
 
   // ── WS Handlers ──────────────────────────────────
   _bindWS() {
     WS.on('connected', msg => {
       this.myId = msg.player_id;
+      this._tryRejoin();
     });
 
     WS.on('room_state', msg => this._onRoomState(msg));
@@ -29,6 +33,11 @@ const Game = {
     WS.on('player_joined', msg => {
       UI.renderWaitPlayers(msg.players, this._maxPlayers);
       UI.notify(`${msg.name} joined!`);
+    });
+
+    WS.on('player_reconnected', msg => {
+      UI.renderWaitPlayers(msg.players, this._maxPlayers);
+      UI.notify(`${msg.name} reconnected!`);
     });
 
     WS.on('player_ready', msg => {
@@ -41,6 +50,13 @@ const Game = {
     });
 
     WS.on('game_start', msg => {
+      this.gameState = msg.game;
+      Board.build();
+      this._renderGame();
+      UI.showScreen('gameScreen');
+    });
+
+    WS.on('game_state_full', msg => {
       this.gameState = msg.game;
       Board.build();
       this._renderGame();
@@ -105,10 +121,30 @@ const Game = {
   // ── Room ──────────────────────────────────────────
   _maxPlayers: 4,
 
+  _tryRejoin() {
+    const path = window.location.pathname;
+    const match = path.match(/^\/game\/([A-Z0-9]{6})$/);
+    if (match) {
+        const code = match[1];
+        const stored = JSON.parse(localStorage.getItem('twin-roll-player'));
+        if (stored && stored.roomCode === code) {
+            WS.send({
+                action: 'rejoin_room',
+                code: code,
+                player_id: stored.playerId,
+            });
+        }
+    }
+  },
+
   _onRoomState(msg) {
-    this.myColor = msg.your_color;
+    this.myId = msg.your_id;
+    this.myColor = msg.your_color; // This might be sent on rejoin
     this.roomCode = msg.code;
     this._maxPlayers = msg.max_players;
+
+    localStorage.setItem('twin-roll-player', JSON.stringify({ playerId: this.myId, roomCode: this.roomCode }));
+    history.pushState({code: this.roomCode}, `Game ${this.roomCode}`, `/game/${this.roomCode}`);
 
     document.getElementById('displayCode').textContent = msg.code;
     document.getElementById('modePill').textContent =
@@ -297,7 +333,9 @@ const Game = {
   leaveGame() {
     if (confirm('Leave the game?')) {
       WS.send({ action: 'leave_room' });
-      location.reload();
+      localStorage.removeItem('twin-roll-player');
+      history.pushState({}, 'Home', '/');
+      setTimeout(() => location.reload(), 100);
     }
   },
 

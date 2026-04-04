@@ -107,6 +107,25 @@ async def websocket_endpoint(ws: WebSocket):
                     current_room = room
                     await send({**room.full_state(), "your_color": color, "your_id": player_id, "type": "waiting_for_players"})
 
+            # ── REJOIN ROOM ──
+            elif action == "rejoin_room":
+                code = msg.get("code", "").upper()
+                pid_to_rejoin = msg.get("player_id")
+                room = rooms.get(code)
+
+                if room and pid_to_rejoin in room.players and room.players[pid_to_rejoin].get('ws') is None:
+                    current_room = room
+                    player_id = pid_to_rejoin # Adopt the persistent ID for this connection
+                    player_data = room.players[pid_to_rejoin]
+                    player_data['ws'] = ws
+
+                    await send({**room.full_state(), "your_id": pid_to_rejoin, "your_color": player_data['color']})
+                    if room.game:
+                        await send({"type": "game_state_full", "game": room.game, "players": room.player_list()})
+                    await room.broadcast({"type": "player_reconnected", "player_id": pid_to_rejoin, "players": room.player_list()}, exclude=pid_to_rejoin)
+                else:
+                    await send({"type": "error", "msg": "Could not rejoin room."})
+
             # ── TOGGLE READY ──
             elif action == "toggle_ready":
                 if current_room and player_id in current_room.players:
@@ -224,8 +243,17 @@ async def websocket_endpoint(ws: WebSocket):
 async def handle_disconnect(room: Room, player_id: str):
     if player_id not in room.players:
         return
-    name = room.players[player_id].get("name", "Player")
-    del room.players[player_id]
-    await room.broadcast({"type": "player_left", "player_id": player_id, "name": name, "players": room.player_list()})
-    if not room.players:
-        rooms.pop(room.code, None)
+
+    player = room.players[player_id]
+    name = player.get("name", "Player")
+
+    if not room.started:
+        # In lobby, leaving is permanent
+        del room.players[player_id]
+        await room.broadcast({"type": "player_left", "player_id": player_id, "name": name, "players": room.player_list()})
+        if not room.players and room.code in rooms:
+            del rooms[room.code]
+    else:
+        # In game, mark as disconnected to allow rejoin
+        player['ws'] = None
+        await room.broadcast({"type": "player_disconnected", "player_id": player_id, "name": name, "players": room.player_list()})

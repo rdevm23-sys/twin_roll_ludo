@@ -131,11 +131,16 @@ const Board = {
           overlay.appendChild(el);
         }
 
+        // Set size dynamically based on cell size
+        const pieceSize = cellSize * 0.75;
+        el.style.width = `${pieceSize}px`;
+        el.style.height = `${pieceSize}px`;
+        el.style.fontSize = `${pieceSize * 0.45}px`;
+
         const isValid = myColor && validMoves && validMoves.some(m => m.piece_id === `${p.color}_${p.index}`);
         el.classList.toggle('valid-move', isValid);
 
-        const stackOffset = pieces.length > 1 ? (stackIndex - (pieces.length - 1) / 2) * 4 : 0;
-        const pieceSize = el.offsetWidth || cellSize * 0.8;
+        const stackOffset = pieces.length > 1 ? (stackIndex - (pieces.length - 1) / 2) * 5 : 0;
         const centerOffset = (cellSize - pieceSize) / 2;
 
         el.style.top = `${top + centerOffset + stackOffset}px`;

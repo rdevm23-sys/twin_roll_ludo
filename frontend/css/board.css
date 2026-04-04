@@ -83,8 +83,6 @@
 
 /* ── Pieces ────────────────────────────────────────── */
 .piece {
-  width: 72%;
-  height: 72%;
   border-radius: 50%;
   border: 2.5px solid rgba(255,255,255,0.7);
   cursor: pointer;
@@ -93,7 +91,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: calc(var(--cell) * 0.32);
   font-weight: 800;
   color: rgba(255,255,255,0.95);
   transition: transform 0.15s, box-shadow 0.15s;

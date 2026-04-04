@@ -108,10 +108,10 @@ const UI = {
 
 // ── Color map ─────────────────────────────────────────
 const COLOR_HEX = {
-  red: '#ff1744',
-  green: '#00c853',
-  yellow: '#ffc400',
-  blue: '#2979ff',
+  red: '#d62828',
+  green: '#04a777',
+  yellow: '#fca311',
+  blue: '#003049',
 };
 
 const COLOR_LIGHT = {
