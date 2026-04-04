@@ -52,7 +52,7 @@ const Game = {
       this.validMoves = msg.valid_moves || [];
       this._renderDice(msg.rolls, msg.auto_pass);
       this._renderGame();
-      if (msg.auto_pass) UI.notify('No valid moves — turn skipped');
+      // No popup for auto_pass - just let the UI update silently
     });
 
     WS.on('piece_moved', msg => {
@@ -61,6 +61,9 @@ const Game = {
       this._handleEvents(msg.events);
       this._renderDiceAfterMove(msg.remaining_dice);
       this._renderGame();
+      if (msg.extra_turn && msg.game.current_turn === this.myColor) {
+        UI.notify('🎲 Rolled a 6 — roll again!');
+      }
     });
 
     WS.on('chat', msg => {
@@ -291,8 +294,12 @@ const Game = {
     });
   },
 
-  // ── Chat ──────────────────────────────────────────
-  sendChat() {
+  leaveGame() {
+    if (confirm('Leave the game?')) {
+      WS.send({ action: 'leave_room' });
+      location.reload();
+    }
+  },
     const inp = document.getElementById('chatInput');
     const msg = inp.value.trim();
     if (!msg) return;

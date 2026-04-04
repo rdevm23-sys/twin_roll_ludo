@@ -183,14 +183,16 @@ def apply_move(state: dict, piece_id: str, die_val: int) -> dict:
     return {"ok": True, "events": events}
 
 def next_turn(state: dict, got_six: bool) -> bool:
-    """Advance turn. Returns True if same player goes again."""
-    if got_six and state["consecutive_sixes"] < 3:
+    """Advance turn. Returns True if same player goes again (got a 6, <3 consecutive)."""
+    if got_six:
         state["consecutive_sixes"] += 1
-        if state["consecutive_sixes"] >= 3:
-            # 3 sixes = lose turn
-            pass
-        else:
+        if state["consecutive_sixes"] < 3:
+            # Reset dice for another roll, same player
+            state["dice"] = []
+            state["dice_rolled"] = False
+            state["moves_used"] = []
             return True
+        # 3 consecutive sixes = forfeit turn, fall through to advance
     state["consecutive_sixes"] = 0
     players = state["players"]
     idx = players.index(state["current_turn"])
@@ -387,13 +389,14 @@ async def websocket_endpoint(ws: WebSocket):
                 # No valid moves → auto advance
                 if not valid_moves:
                     has_six = 6 in rolls
-                    same_player = next_turn(game, has_six)
+                    extra_turn = next_turn(game, has_six)
                     await room.broadcast({
                         "type": "dice_rolled",
                         "player_id": player_id,
                         "rolls": rolls,
                         "valid_moves": [],
                         "auto_pass": True,
+                        "extra_turn": extra_turn,
                         "game": game,
                     })
                 else:
@@ -435,10 +438,11 @@ async def websocket_endpoint(ws: WebSocket):
 
                 # Check remaining moves
                 remaining_valid = compute_valid_moves(game, game["moves_used"])
+                extra_turn = False
 
-                if not game["moves_used"] or not remaining_valid or game["winner"]:
+                if not game["winner"] and (not game["moves_used"] or not remaining_valid):
                     has_six = 6 in game["dice"]
-                    next_turn(game, has_six)
+                    extra_turn = next_turn(game, has_six)
 
                 await room.broadcast({
                     "type": "piece_moved",
@@ -447,6 +451,7 @@ async def websocket_endpoint(ws: WebSocket):
                     "events": result["events"],
                     "remaining_dice": game["moves_used"],
                     "valid_moves": remaining_valid if game["moves_used"] else [],
+                    "extra_turn": extra_turn,
                     "game": game,
                 })
 

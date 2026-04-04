@@ -2,33 +2,33 @@
 
 :root {
   /* Neutral warm background */
-  --bg: #f5f0e8;
-  --bg2: #ede7d9;
+  --bg: #f2ede3;
+  --bg2: #e8e0d0;
   --surface: #ffffff;
-  --surface2: #f9f5ef;
-  --border: #d9d0c0;
+  --surface2: #f7f3ec;
+  --border: #ddd4be;
   --shadow: rgba(80, 60, 20, 0.10);
 
-  /* Player colors - rich and vivid */
-  --red: #d62828;
-  --red-light: #ff6b6b;
-  --red-bg: #fdecea;
-  --red-border: #f5b8b8;
+  /* Player colors - vivid and saturated */
+  --red: #e01010;
+  --red-light: #ff4444;
+  --red-bg: #ffe5e5;
+  --red-border: #ffaaaa;
 
-  --green: #2d6a4f;
-  --green-light: #52b788;
-  --green-bg: #eaf7f0;
-  --green-border: #b7e4c7;
+  --green: #1a8a3a;
+  --green-light: #2ecc71;
+  --green-bg: #e0f9e8;
+  --green-border: #90e8aa;
 
-  --yellow: #e07b00;
-  --yellow-light: #ffb703;
-  --yellow-bg: #fff8e6;
-  --yellow-border: #ffd166;
+  --yellow: #e08000;
+  --yellow-light: #ffc107;
+  --yellow-bg: #fff4d0;
+  --yellow-border: #ffd060;
 
-  --blue: #1a5276;
-  --blue-light: #4895ef;
-  --blue-bg: #eaf3fb;
-  --blue-border: #aed6f1;
+  --blue: #1060c0;
+  --blue-light: #3d9df0;
+  --blue-bg: #deeeff;
+  --blue-border: #90c8ff;
 
   /* Text */
   --text: #2c2416;

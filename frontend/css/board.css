@@ -30,10 +30,10 @@
 }
 
 /* ── Home Bases ────────────────────────────────────── */
-.home-red    { background: #fdecea; }
-.home-green  { background: #eaf7f0; }
-.home-yellow { background: #fff8e6; }
-.home-blue   { background: #eaf3fb; }
+.home-red    { background: #ffcccc; }
+.home-green  { background: #c0f0cc; }
+.home-yellow { background: #ffe8a0; }
+.home-blue   { background: #bbd8ff; }
 
 /* Inner home token circles */
 .home-token {
@@ -42,47 +42,42 @@
   border-radius: 50%;
   border: 2px solid rgba(0,0,0,0.12);
 }
-.home-token-red    { background: radial-gradient(circle at 35% 35%, #ff6b6b, #d62828); }
-.home-token-green  { background: radial-gradient(circle at 35% 35%, #52b788, #2d6a4f); }
-.home-token-yellow { background: radial-gradient(circle at 35% 35%, #ffb703, #e07b00); }
-.home-token-blue   { background: radial-gradient(circle at 35% 35%, #4895ef, #1a5276); }
+.home-token-red    { background: radial-gradient(circle at 35% 35%, #ff5555, #cc0000); }
+.home-token-green  { background: radial-gradient(circle at 35% 35%, #33dd66, #118833); }
+.home-token-yellow { background: radial-gradient(circle at 35% 35%, #ffd040, #cc7700); }
+.home-token-blue   { background: radial-gradient(circle at 35% 35%, #44aaff, #0055cc); }
 
 /* ── Track Cells ───────────────────────────────────── */
 .cell-track { background: #fff; }
 
-.track-red    { background: #fdecea; }
-.track-green  { background: #eaf7f0; }
-.track-yellow { background: #fff8e6; }
-.track-blue   { background: #eaf3fb; }
-
 /* Safe squares */
 .cell-safe {
-  background: #fffde7;
+  background: #fffbe6;
 }
 .cell-safe::after {
   content: '★';
   font-size: calc(var(--cell) * 0.38);
-  color: #e07b00;
+  color: #cc8800;
   position: absolute;
   top: 1px;
   right: 2px;
   line-height: 1;
-  opacity: 0.7;
+  opacity: 0.9;
 }
 
 /* ── Home Column (colored lanes) ───────────────────── */
-.finish-red    { background: #fdecea; }
-.finish-green  { background: #eaf7f0; }
-.finish-yellow { background: #fff8e6; }
-.finish-blue   { background: #eaf3fb; }
+.finish-red    { background: #ffcccc; }
+.finish-green  { background: #c0f0cc; }
+.finish-yellow { background: #ffe8a0; }
+.finish-blue   { background: #bbd8ff; }
 
 /* Center finish */
 .finish-center {
   background: conic-gradient(
-    #fdecea 0deg 90deg,
-    #eaf7f0 90deg 180deg,
-    #fff8e6 180deg 270deg,
-    #eaf3fb 270deg 360deg
+    #ffcccc 0deg 90deg,
+    #c0f0cc 90deg 180deg,
+    #ffe8a0 180deg 270deg,
+    #bbd8ff 270deg 360deg
   );
 }
 
@@ -91,7 +86,7 @@
   width: 72%;
   height: 72%;
   border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.6);
+  border: 2.5px solid rgba(255,255,255,0.7);
   cursor: pointer;
   position: relative;
   z-index: 3;
@@ -100,18 +95,19 @@
   justify-content: center;
   font-size: calc(var(--cell) * 0.32);
   font-weight: 800;
-  color: rgba(255,255,255,0.9);
+  color: rgba(255,255,255,0.95);
   transition: transform 0.15s, box-shadow 0.15s;
   flex-shrink: 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 8px rgba(0,0,0,0.25);
   font-family: 'Syne', sans-serif;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 .piece:active { transform: scale(0.9); }
 
-.piece-red    { background: radial-gradient(circle at 35% 32%, #ff8080, #c0121f); }
-.piece-green  { background: radial-gradient(circle at 35% 32%, #5ecb8a, #1e5e3a); }
-.piece-yellow { background: radial-gradient(circle at 35% 32%, #ffd060, #c86a00); }
-.piece-blue   { background: radial-gradient(circle at 35% 32%, #6ab8ff, #0e4c8a); }
+.piece-red    { background: radial-gradient(circle at 35% 32%, #ff5555, #cc0000); }
+.piece-green  { background: radial-gradient(circle at 35% 32%, #33dd66, #118833); }
+.piece-yellow { background: radial-gradient(circle at 35% 32%, #ffd040, #cc7700); }
+.piece-blue   { background: radial-gradient(circle at 35% 32%, #44aaff, #0055cc); }
 
 /* Valid move highlight */
 .piece.valid-move {

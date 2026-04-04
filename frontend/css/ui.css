@@ -160,6 +160,20 @@
   padding: 3px 10px;
 }
 
+.leave-btn {
+  background: transparent;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: background 0.15s, color 0.15s;
+}
+.leave-btn:active { background: #ffe5e5; color: var(--red); border-color: var(--red); }
+
 /* Player score strip */
 .score-strip {
   display: flex;

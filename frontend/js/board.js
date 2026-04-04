@@ -78,20 +78,12 @@ const Board = {
     HOME_COL_CELLS.yellow.forEach(([r,c]) => g[r][c] = 'finish-yellow');
     HOME_COL_CELLS.blue.forEach(([r,c])   => g[r][c] = 'finish-blue');
 
-    // Track cells
+    // Track cells — no lane coloring, only safe squares
     TRACK_CELLS.forEach(([r,c], idx) => {
-      // Colour lanes
-      if (idx >= 0  && idx <= 4)  g[r][c] = 'track-red';
-      else if (idx >= 13 && idx <= 18) g[r][c] = 'track-green';
-      else if (idx >= 26 && idx <= 31) g[r][c] = 'track-blue';
-      else if (idx >= 39 && idx <= 44) g[r][c] = 'track-yellow';
-      else g[r][c] = 'cell-track';
-
-      // Safe squares override (but keep colour lane if it's a start)
       if (SAFE_TRACK_INDICES.has(idx)) {
-        // Start squares are already colour-coded — just add safe class via JS
-        const cellClass = g[r][c];
-        g[r][c] = cellClass + ' cell-safe';
+        g[r][c] = 'cell-safe';
+      } else {
+        g[r][c] = 'cell-track';
       }
     });
 
