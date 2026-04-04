@@ -20,13 +20,13 @@ if (import.meta.env.PROD) {
 }
 
 console.log(
-  `%c LibreLudo v${__APP_VERSION__} %c License: ${__APP_LICENSE__}`,
-  'background: #4caf50; color: #fff; padding: 5px 10px; border-radius: 3px 0 0 3px; font-weight: bold;',
-  'background: #e65100; color: #fff; padding: 5px 10px; font-weight: bold;'
+  `%c Twin Roll v${__APP_VERSION__} %c License: ${__APP_LICENSE__}`,
+  'background: #c2410c; color: #fff; padding: 5px 10px; border-radius: 3px 0 0 3px; font-weight: bold;',
+  'background: #ea580c; color: #fff; padding: 5px 10px; font-weight: bold;'
 );
 console.log(
-  '%cSource: https://github.com/priyanshurav/libreludo',
-  'font-style: italic; color: white; padding-top: 5px;'
+  '%cBoard UI based on LibreLudo — https://github.com/priyanshurav/libreludo',
+  'font-style: italic; color: #57534e; padding-top: 5px;'
 );
 
 createRoot(document.getElementById('root')!).render(

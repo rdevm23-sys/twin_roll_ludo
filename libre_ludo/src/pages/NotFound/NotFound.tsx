@@ -7,7 +7,7 @@ function NotFound() {
   const cleanup = useCleanup();
 
   useEffect(() => {
-    document.title = '404 Not Found';
+    document.title = 'Twin Roll — Page not found';
     cleanup();
   }, [cleanup]);
   return (

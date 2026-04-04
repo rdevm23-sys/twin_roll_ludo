@@ -9,7 +9,7 @@ function Play() {
   const location = useLocation();
   const { initData } = (location.state as { initData: TPlayerInitData[] }) ?? {};
   useEffect(() => {
-    document.title = 'Play LibreLudo';
+    document.title = 'Twin Roll — Play';
     return () => cleanup();
   }, [cleanup]);
   return initData && initData?.length !== 0 ? (

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import PlayerInput from './components/PlayerInput/PlayerInput';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import type { TPlayerInitData } from '../../types';
 import { ToastContainer, toast } from 'react-toastify';
 import LoadingScreen from '../../components/LoadingScreen/LoadingScreen';
@@ -36,6 +36,8 @@ const INITIAL_PLAYER_DATA: TPlayerInitData[] = [
 ];
 
 function PlayerSetup() {
+  const [searchParams] = useSearchParams();
+  const passAndPlayOnly = searchParams.get('mode') === 'pass';
   const [playerCount, setPlayerCount] = useState(2);
   const [dialogWidth, setDialogWidth] = useState(0);
   const [playersData, setPlayersData] = useState<TPlayerInitData[]>(INITIAL_PLAYER_DATA);
@@ -49,9 +51,14 @@ function PlayerSetup() {
   );
 
   useEffect(() => {
-    document.title = 'LibreLudo - Player Setup';
+    document.title = passAndPlayOnly ? 'Twin Roll — Pass & play setup' : 'Twin Roll — Local setup';
     cleanup();
-  }, [cleanup]);
+  }, [cleanup, passAndPlayOnly]);
+
+  useEffect(() => {
+    if (!passAndPlayOnly) return;
+    setPlayersData((rows) => rows.map((r) => ({ ...r, isBot: false })));
+  }, [passAndPlayOnly]);
 
   const onResize = useCallback(() => {
     if (!dialogNode) return;
@@ -96,6 +103,9 @@ function PlayerSetup() {
           } as React.CSSProperties
         }
       >
+        {passAndPlayOnly && (
+          <p className={styles.modeHint}>Same device — pass the phone or screen between players.</p>
+        )}
         <div className={styles.playerCountSelector}>
           <button className={styles.playerCount} onClick={() => setPlayerCount(2)}>
             2
@@ -113,6 +123,7 @@ function PlayerSetup() {
               colour={c}
               name={playersData[index].name}
               isBot={playersData[index].isBot}
+              hideBotToggle={passAndPlayOnly}
               onBotStatusChange={(isBot) =>
                 setPlayersData(playersData.map((d, i) => (i === index ? { ...d, isBot } : d)))
               }

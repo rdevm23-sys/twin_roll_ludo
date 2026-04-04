@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { registerNewPlayer, setPlayerSequence } from '../../../../state/slices/playersSlice';
 import { type TPlayerColour } from '../../../../types';
 import Board from '../Board/Board';
@@ -74,10 +74,20 @@ function Game({ initData }: Props) {
     dispatch(changeTurnThunk(moveAndCapture));
   }, [currentPlayerColour, dispatch, initData.length, moveAndCapture, players.length]);
 
-  const handleDiceRoll = (colour: TPlayerColour, diceNumber: number) => {
-    if (initData.length === 0) return;
-    dispatch(handlePostDiceRollThunk(colour, diceNumber, moveAndCapture));
-  };
+  const passAndPlay = useMemo(
+    () => initData.length >= 2 && initData.every((d) => !d.isBot),
+    [initData]
+  );
+
+  const currentPlayerName = players.find((p) => p.colour === currentPlayerColour)?.name;
+
+  const handleDiceRoll = useCallback(
+    (colour: TPlayerColour, diceNumber: number) => {
+      if (initData.length === 0) return;
+      dispatch(handlePostDiceRollThunk(colour, diceNumber, moveAndCapture));
+    },
+    [dispatch, initData.length, moveAndCapture]
+  );
 
   const handleExitBtnClick = () => navigate('/');
 
@@ -92,6 +102,11 @@ function Game({ initData }: Props) {
       }
     >
       <Board onDiceClick={handleDiceRoll} />
+      {passAndPlay && currentPlayerColour && currentPlayerName && !isGameEnded && (
+        <div className={styles.passBanner} role="status">
+          Pass the device — <strong>{currentPlayerName}</strong>&apos;s turn
+        </div>
+      )}
       <button
         type="button"
         aria-label="Exit button"

@@ -5,7 +5,7 @@ import dice4 from '../../../../assets/dice/4.svg';
 import dice5 from '../../../../assets/dice/5.svg';
 import dice6 from '../../../../assets/dice/6.svg';
 import dicePlaceholder from '../../../../assets/dice/dice_placeholder.gif';
-import { useCallback, useEffect, useMemo } from 'react';
+import { memo, useCallback, useEffect, useMemo } from 'react';
 import { type TPlayerColour } from '../../../../types';
 import { useDispatch, useSelector } from 'react-redux';
 import type { AppDispatch, RootState } from '../../../../state/store';
@@ -102,4 +102,4 @@ function Dice({ colour, onDiceClick, playerName }: Props) {
   );
 }
 
-export default Dice;
+export default memo(Dice);

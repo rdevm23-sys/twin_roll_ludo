@@ -11,9 +11,17 @@ type Props = {
   isBot: boolean;
   onBotStatusChange: (isBot: boolean) => void;
   onNameChange: (name: string) => void;
+  hideBotToggle?: boolean;
 };
 
-function PlayerInput({ colour, isBot, name, onBotStatusChange, onNameChange }: Props) {
+function PlayerInput({
+  colour,
+  isBot,
+  name,
+  onBotStatusChange,
+  onNameChange,
+  hideBotToggle,
+}: Props) {
   return (
     <div className={styles.playerInput}>
       <span
@@ -27,15 +35,17 @@ function PlayerInput({ colour, isBot, name, onBotStatusChange, onNameChange }: P
         value={name}
         onChange={(e) => onNameChange(e.target.value.slice(0, MAX_PLAYER_NAME_LENGTH))}
       />
-      <button
-        className={styles.botStatusBtn}
-        data-tooltip-id="bot-status-tooltip"
-        data-tooltip-content={isBot ? 'Bot' : 'Human'}
-        aria-label="Toggle Ludo bot on or off"
-        onClick={() => onBotStatusChange(!isBot)}
-      >
-        {isBot ? <BotIcon /> : <HumanIcon />}
-      </button>
+      {!hideBotToggle && (
+        <button
+          className={styles.botStatusBtn}
+          data-tooltip-id="bot-status-tooltip"
+          data-tooltip-content={isBot ? 'Bot' : 'Human'}
+          aria-label="Toggle Ludo bot on or off"
+          onClick={() => onBotStatusChange(!isBot)}
+        >
+          {isBot ? <BotIcon /> : <HumanIcon />}
+        </button>
+      )}
     </div>
   );
 }

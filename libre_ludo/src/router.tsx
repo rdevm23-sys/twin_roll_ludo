@@ -7,6 +7,7 @@ import { lazy, Suspense, type LazyExoticComponent, type ReactElement } from 'rea
 
 const Play = lazy(() => import('./pages/Play/Play.tsx'));
 const PlayerSetup = lazy(() => import('./pages/PlayerSetup/PlayerSetup.tsx'));
+const OnlinePage = lazy(() => import('./pages/Online/OnlinePage.tsx'));
 
 const wrapWithSuspense = (Component: LazyExoticComponent<() => ReactElement>) => (
   <Suspense fallback={<LoadingScreen />}>
@@ -30,6 +31,10 @@ export const router = createBrowserRouter([
       {
         path: '/setup',
         element: wrapWithSuspense(PlayerSetup),
+      },
+      {
+        path: '/online',
+        element: wrapWithSuspense(OnlinePage),
       },
       {
         path: '*',

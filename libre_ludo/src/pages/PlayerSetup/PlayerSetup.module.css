@@ -20,6 +20,17 @@
   -webkit-box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.75);
   box-shadow: 0px 0px 15px 1px rgba(0, 0, 0, 0.75);
 }
+
+.mode-hint {
+  width: 90%;
+  margin: 0.5rem 0 0;
+  padding: 0 0.5rem;
+  font-size: calc(var(--dialog-width, 320px) / 28);
+  line-height: 1.35;
+  color: #57534e;
+  text-align: center;
+}
+
 .player-count-selector {
   position: relative;
   height: 9%;

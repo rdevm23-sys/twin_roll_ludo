@@ -98,17 +98,24 @@
 .cta-buttons {
   margin-top: 2.8em;
   margin-bottom: 1em;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.75em;
+  max-width: 22ch;
+  margin-inline: auto;
 }
 
 .cta-button {
-  display: inline-block;
+  display: block;
+  text-align: center;
   bottom: 0;
   background: linear-gradient(180deg, #ea580c 0%, var(--color-primary) 100%);
   color: #fffaf5;
   border: none;
-  font-size: 1.5em;
+  font-size: 1.35em;
   font-weight: 700;
-  padding: 0.9em 0.8em;
+  padding: 0.85em 0.8em;
   box-shadow:
     0 4px 14px rgba(194, 65, 12, 0.35),
     0 1px 0 rgba(255, 255, 255, 0.2) inset;
@@ -119,13 +126,27 @@
     transform 0.2s ease,
     box-shadow 0.2s ease;
   cursor: pointer;
-  margin-inline: 0.7em;
 }
 
 .play-now-btn {
   box-shadow:
     0 8px 28px rgba(194, 65, 12, 0.4),
     0 1px 0 rgba(255, 255, 255, 0.2) inset;
+}
+
+.secondary-cta {
+  font-size: 1.15em;
+  font-weight: 600;
+  background: transparent;
+  color: var(--color-primary);
+  border: 2px solid rgba(194, 65, 12, 0.45);
+  box-shadow: none;
+}
+
+.secondary-cta:hover,
+.secondary-cta:focus-visible {
+  background: var(--color-accent-soft);
+  transform: translateY(-2px);
 }
 
 .play-now-btn:hover,

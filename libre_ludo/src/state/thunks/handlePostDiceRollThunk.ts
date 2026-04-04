@@ -34,7 +34,7 @@ export const handlePostDiceRollThunk = (
     if (player.numberOfConsecutiveSix === 3) {
       dispatch(resetNumberOfConsecutiveSix(colour));
       dispatch(deactivateAllTokens(colour));
-      if (player.isBot) await sleep(500);
+      if (player.isBot) await sleep(220);
       dispatch(changeTurnThunk(moveAndCapture));
       return { moveData: null, shouldContinue: false };
     }
@@ -54,7 +54,7 @@ export const handlePostDiceRollThunk = (
     if (areAllTokensInSameCoord) {
       const moveData = await moveAndCapture(movableTokens[0], diceNumber);
       if (!moveData) {
-        if (player.isBot) await sleep(500);
+        if (player.isBot) await sleep(220);
         dispatch(changeTurnThunk(moveAndCapture));
         return { shouldContinue: false, moveData };
       }
@@ -70,7 +70,7 @@ export const handlePostDiceRollThunk = (
       return { shouldContinue: true, moveData };
     }
     if (!isAnyTokenActiveOfColour(colour, players)) {
-      if (player.isBot) await sleep(500);
+      if (player.isBot) await sleep(220);
       dispatch(changeTurnThunk(moveAndCapture));
       return { shouldContinue: false, moveData: null };
     }

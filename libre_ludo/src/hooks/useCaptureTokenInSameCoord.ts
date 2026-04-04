@@ -89,7 +89,7 @@ export function useCaptureTokenInSameCoord() {
             };
             // Trigger the first transition
             if (isFirstCapture) isFirstCapture = false;
-            else await sleep(250);
+            else await sleep(160);
             index--;
             const { x, y } = getPosition(tokenPath[index], defaultTokenAlignmentData);
             tokenEl.style.transform = `translate(${x}, ${y})`;

@@ -5,14 +5,14 @@ export const pwaOptions: Partial<VitePWAOptions> = {
   filename: 'sw.js',
   injectRegister: false,
   manifest: {
-    name: 'LibreLudo',
-    short_name: 'LibreLudo',
+    name: 'Twin Roll',
+    short_name: 'Twin Roll',
     description:
-      'An ad-free, open-source Ludo game for the browser. Clean, privacy-focused local multiplayer — no downloads, no logins, no interruptions.',
+      'Pass-and-play or online Ludo in your browser — optional twin dice, private rooms, and matchmaking with the Twin Roll server.',
     start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
-    theme_color: '#7C5FFF',
+    theme_color: '#c2410c',
     icons: [
       {
         src: '/icons/favicon.png',

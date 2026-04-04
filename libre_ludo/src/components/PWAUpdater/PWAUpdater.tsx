@@ -5,10 +5,10 @@ export const PWAUpdater = () => {
   useEffect(() => {
     const updateSW = registerSW({
       onNeedRefresh() {
-        const shouldUpdate = window.confirm('A new version of LibreLudo is available. Update now?');
+        const shouldUpdate = window.confirm('A new version of Twin Roll is available. Update now?');
         if (shouldUpdate) {
           updateSW(true);
-          console.info(`LibreLudo updated successfully to v${__APP_VERSION__}`);
+          console.info(`Twin Roll updated successfully to v${__APP_VERSION__}`);
         } else {
           console.info('Update postponed. Current version maintained.');
         }

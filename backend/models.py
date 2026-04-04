@@ -30,9 +30,13 @@ class Room:
         data = json.dumps(msg)
         for pid, p in list(self.players.items()):
             if pid != exclude:
+                ws = p.get("ws")
+                if ws is None:
+                    continue
                 try:
-                    await p["ws"].send_text(data)
-                except: pass
+                    await ws.send_text(data)
+                except Exception:
+                    pass
 
     def player_list(self):
         return [{"id": pid, "name": p["name"], "color": p.get("color"), "ready": p.get("ready", False)}
