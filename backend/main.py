@@ -20,6 +20,13 @@ app.include_router(router)
 app.add_websocket_route("/ws", websocket_endpoint)
 
 # ── Serve frontend ──────────────────────────────────────────────────────────
-frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
+# Try to serve built LibreLudo frontend first, then fall back to old frontend
+frontend_path = os.path.join(os.path.dirname(__file__), "..", "libre_ludo", "dist")
 if os.path.exists(frontend_path):
-    app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+    # This is primarily for development; nginx serves this in production
+    app.mount("/", StaticFiles(directory=frontend_path, html=True), name="static")
+else:
+    # Fallback to old frontend for backwards compatibility
+    frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
+    if os.path.exists(frontend_path):
+        app.mount("/static", StaticFiles(directory=frontend_path), name="static")

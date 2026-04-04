@@ -1,5 +1,6 @@
 #!/bin/bash
 # Twin Roll — Oracle Free Tier Ubuntu Deploy Script
+# Integrated with LibreLudo frontend
 # Run as: bash deploy.sh
 set -e
 
@@ -7,7 +8,9 @@ echo "=== Twin Roll Deployment ==="
 
 # 1. Update system
 sudo apt update && sudo apt upgrade -y
-sudo apt install -y python3 python3-pip python3-venv nginx certbot python3-certbot-nginx
+sudo apt install -y python3 python3-pip python3-venv nginx certbot python3-certbot-nginx curl
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt install -y nodejs
 
 # 2. Create app directory
 sudo mkdir -p /opt/twin-roll
@@ -15,11 +18,16 @@ sudo chown ubuntu:ubuntu /opt/twin-roll
 
 # 3. Copy files (run from project root)
 cp -r backend /opt/twin-roll/
-cp -r frontend /opt/twin-roll/
+cp -r libre_ludo /opt/twin-roll/
 cp pom.properties /opt/twin-roll/
 
-# 4. Python virtual environment
+# 4. Build LibreLudo frontend
+cd /opt/twin-roll/libre_ludo
+npm ci
+npm run build
 cd /opt/twin-roll
+
+# 5. Python virtual environment
 python3 -m venv venv
 venv/bin/pip install --upgrade pip
 venv/bin/pip install -r backend/requirements.txt
