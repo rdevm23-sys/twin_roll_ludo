@@ -26,12 +26,20 @@ const TRACK_CELLS = [
   [7,0],[6,0],
 ];
 
+// Six squares per home column (pos 100..105) ending at the center arm; must match backend HOME_COLUMN_LENGTH.
 const HOME_COL_CELLS = {
-  red:    [[7,1],[7,2],[7,3],[7,4],[7,5]],
-  green:  [[1,7],[2,7],[3,7],[4,7],[5,7]],
-  yellow: [[7,13],[7,12],[7,11],[7,10],[7,9]],
-  blue:   [[13,7],[12,7],[11,7],[10,7],[9,7]],
+  red:    [[7,1],[7,2],[7,3],[7,4],[7,5],[7,6]],
+  green:  [[1,7],[2,7],[3,7],[4,7],[5,7],[6,7]],
+  yellow: [[7,13],[7,12],[7,11],[7,10],[7,9],[7,8]],
+  blue:   [[13,7],[12,7],[11,7],[10,7],[9,7],[8,7]],
 };
+
+// Mirrors backend/config.py for path animation (1-based track numbers as on server).
+const TOTAL_TRACK = 52;
+const HOME_COLUMN_LEN = 6;
+const MOVE_START_SQUARES = { red: 1, green: 14, yellow: 27, blue: 40 };
+const MOVE_HOME_ENTRY = { red: 51, green: 12, yellow: 25, blue: 38 };
+const FINISH_CENTER_CELL = [7, 7];
 
 const HOME_PIECE_POSITIONS = {
   red:    [[1,1],[1,4],[4,1],[4,4]],
@@ -42,8 +50,65 @@ const HOME_PIECE_POSITIONS = {
 
 const SAFE_TRACK_INDICES = new Set([0, 8, 13, 21, 26, 34, 39, 47]);
 
+function _coordForPieceState(color, index, pos, trackPos, finished) {
+  if (finished || pos === 200) return FINISH_CENTER_CELL;
+  if (pos === -1) return HOME_PIECE_POSITIONS[color][index];
+  if (pos >= 100) return HOME_COL_CELLS[color][pos - 100];
+  return TRACK_CELLS[trackPos];
+}
+
+function _advanceOneStep(color, pos, trackPos) {
+  if (pos === -1) return null;
+  if (pos >= 100) {
+    const colPos = pos - 100;
+    const newCol = colPos + 1;
+    if (newCol === HOME_COLUMN_LEN) return { pos: 200, track_pos: -1 };
+    if (newCol < HOME_COLUMN_LEN) return { pos: 100 + newCol, track_pos: -1 };
+    return null;
+  }
+  const entry = MOVE_HOME_ENTRY[color];
+  const startIdx = MOVE_START_SQUARES[color] - 1;
+  const stepsTraveled = (trackPos - startIdx + TOTAL_TRACK) % TOTAL_TRACK;
+  const stepsToEntry = (entry - startIdx + TOTAL_TRACK) % TOTAL_TRACK;
+  const d = 1;
+  if (stepsTraveled < stepsToEntry && stepsTraveled + d > stepsToEntry) {
+    const colPos = (stepsTraveled + d) - stepsToEntry - 1;
+    if (colPos < HOME_COLUMN_LEN) return { pos: 100 + colPos, track_pos: -1 };
+    return null;
+  }
+  const newTrack = (trackPos + d) % TOTAL_TRACK;
+  return { pos: newTrack, track_pos: newTrack };
+}
+
+/** Coordinates after each step of a move (length = dieVal), matching server rules. */
+function _buildStepCoords(color, prev, dieVal) {
+  if (prev.finished) return [];
+  if (prev.pos === -1) {
+    if (dieVal !== 6) return [];
+    const startIdx = MOVE_START_SQUARES[color] - 1;
+    return [TRACK_CELLS[startIdx]];
+  }
+  const out = [];
+  let pos = prev.pos;
+  let trackPos = prev.track_pos;
+  for (let s = 0; s < dieVal; s++) {
+    const next = _advanceOneStep(color, pos, trackPos);
+    if (!next) break;
+    pos = next.pos;
+    trackPos = next.track_pos;
+    if (pos === 200) {
+      out.push(FINISH_CENTER_CELL);
+      break;
+    }
+    out.push(_coordForPieceState(color, prev.index, pos, trackPos, false));
+  }
+  return out;
+}
+
 // ── Board Builder ─────────────────────────────────────
 const Board = {
+  _pathAnimTimer: null,
+
   // Build the static 15×15 grid
   build() {
     const board = document.getElementById('ludoBoard');
@@ -111,11 +176,16 @@ const Board = {
     if (overlay) overlay.innerHTML = '';
   },
 
-  // Render all pieces from game state
-  renderPieces(gameState, myColor, validMoves) {
+  // Render all pieces from game state. moveAnim: { pieceId, prev, dieVal } steps along the real path.
+  renderPieces(gameState, myColor, validMoves, moveAnim) {
     const overlay = document.getElementById('pieces-overlay');
     const boardEl = document.getElementById('ludoBoard');
     if (!overlay || !boardEl) return;
+
+    if (this._pathAnimTimer) {
+      clearTimeout(this._pathAnimTimer);
+      this._pathAnimTimer = null;
+    }
 
     const boardRect = boardEl.getBoundingClientRect();
     const overlayRect = overlay.getBoundingClientRect();
@@ -125,8 +195,19 @@ const Board = {
     const boardOffsetX = boardRect.left - overlayRect.left;
     const boardOffsetY = boardRect.top - overlayRect.top;
 
+    let excludePid = null;
+    let animSteps = null;
+    let animPrev = null;
+    let animPiece = null;
+    if (moveAnim?.pieceId && gameState.pieces[moveAnim.pieceId] && moveAnim.dieVal > 0) {
+      animPiece = gameState.pieces[moveAnim.pieceId];
+      animPrev = moveAnim.prev;
+      animSteps = _buildStepCoords(animPiece.color, animPrev, moveAnim.dieVal);
+      if (animSteps.length > 0) excludePid = moveAnim.pieceId;
+    }
+
     const renderedPieceIds = new Set();
-    const cellMap = this._getPiecePositions(gameState);
+    const cellMap = this._getPiecePositions(gameState, excludePid);
 
     Object.entries(cellMap).forEach(([cellKey, pieces]) => {
       if (cellKey === 'finished') return;
@@ -157,10 +238,71 @@ const Board = {
         const stackOffset = pieces.length > 1 ? (stackIndex - (pieces.length - 1) / 2) * (pieceSize * 0.1) : 0; // Dynamic stack offset
         const centerOffset = (cellSize - pieceSize) / 2;
 
+        el.style.transition = '';
         el.style.top = `${top + centerOffset + stackOffset}px`;
         el.style.left = `${left + centerOffset + stackOffset}px`;
       });
     });
+
+    const runPathAnim = () => {
+      if (!animPiece || !animPrev || !animSteps || animSteps.length === 0) return;
+      const p = animPiece;
+      const pieceId = `piece_${p.color}_${p.index}`;
+      renderedPieceIds.add(pieceId);
+
+      let el = document.getElementById(pieceId);
+      if (!el) {
+        el = this._createPieceEl(p);
+        overlay.appendChild(el);
+      }
+
+      const pieceSize = cellSize * 0.65;
+      el.style.width = `${pieceSize}px`;
+      el.style.height = `${pieceSize}px`;
+      el.style.fontSize = `${pieceSize * 0.45}px`;
+      const isValid = myColor && validMoves && validMoves.some(m => m.piece_id === `${p.color}_${p.index}`);
+      el.classList.toggle('valid-move', isValid);
+
+      const centerOffset = (cellSize - pieceSize) / 2;
+      const placeAt = (coord) => {
+        if (!coord) return;
+        const [r, c] = coord;
+        el.style.top = `${r * cellSize + boardOffsetY + centerOffset}px`;
+        el.style.left = `${c * cellSize + boardOffsetX + centerOffset}px`;
+      };
+
+      const startCoord = _coordForPieceState(p.color, animPrev.index, animPrev.pos, animPrev.track_pos, !!animPrev.finished);
+      el.style.transition = 'none';
+      placeAt(startCoord);
+      el.offsetHeight; // reflow
+
+      requestAnimationFrame(() => {
+        el.style.transition = 'top 0.11s ease-out, left 0.11s ease-out';
+        let step = 0;
+        const ms = 115;
+        const tick = () => {
+          if (step < animSteps.length) {
+            placeAt(animSteps[step]);
+            step += 1;
+            this._pathAnimTimer = setTimeout(tick, ms);
+          } else {
+            this._pathAnimTimer = null;
+            if (!p.finished) {
+              const fin = _coordForPieceState(p.color, p.index, p.pos, p.track_pos, false);
+              placeAt(fin);
+            } else {
+              placeAt(FINISH_CENTER_CELL);
+              setTimeout(() => {
+                if (el.parentNode) el.remove();
+              }, ms * 2);
+            }
+          }
+        };
+        this._pathAnimTimer = setTimeout(tick, ms);
+      });
+    };
+
+    runPathAnim();
 
     overlay.querySelectorAll('.piece').forEach(el => {
       if (!renderedPieceIds.has(el.id)) {
@@ -203,10 +345,12 @@ const Board = {
     });
   },
 
-  _getPiecePositions(gameState) {
+  _getPiecePositions(gameState, excludePieceId) {
     const cellMap = {};
     Object.values(gameState.pieces).forEach(p => {
       if (p.finished) return;
+      const pid = `${p.color}_${p.index}`;
+      if (excludePieceId && pid === excludePieceId) return;
       let coords;
       if (p.pos === -1) coords = HOME_PIECE_POSITIONS[p.color][p.index];
       else if (p.pos >= 100) coords = HOME_COL_CELLS[p.color][p.pos - 100];

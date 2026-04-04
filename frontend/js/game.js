@@ -10,6 +10,8 @@ const Game = {
   selectedDieVal: null,
   pendingPieceId: null,
   isReady: false,
+  /** One-shot path animation for the last piece_moved */
+  _pendingPieceMoveAnim: null,
 
   // ── Init ──────────────────────────────────────────
   init() {
@@ -76,10 +78,20 @@ const Game = {
     });
 
     WS.on('piece_moved', msg => {
+      const prevGs = this.gameState;
+      const prevPiece =
+        prevGs && prevGs.pieces && msg.piece_id && prevGs.pieces[msg.piece_id]
+          ? JSON.parse(JSON.stringify(prevGs.pieces[msg.piece_id]))
+          : null;
       this.gameState = msg.game;
       this.validMoves = msg.valid_moves || [];
       this._handleEvents(msg.events);
       this._renderDiceAfterMove(msg.remaining_dice);
+      const dv = msg.die_val;
+      this._pendingPieceMoveAnim =
+        prevPiece && typeof dv === 'number' && dv > 0
+          ? { pieceId: msg.piece_id, prev: prevPiece, dieVal: dv }
+          : null;
       this._renderGame();
       // Removed pop-up notification for rolling 6
     });
@@ -199,8 +211,10 @@ const Game = {
     const g = this.gameState;
     const isMyTurn = g.current_turn === this.myColor;
 
-    // Board pieces
-    Board.renderPieces(g, isMyTurn ? this.myColor : null, isMyTurn ? this.validMoves : []);
+    // Board pieces (consume one-shot path animation)
+    const moveAnim = this._pendingPieceMoveAnim;
+    this._pendingPieceMoveAnim = null;
+    Board.renderPieces(g, isMyTurn ? this.myColor : null, isMyTurn ? this.validMoves : [], moveAnim);
 
     // Turn indicator
     document.getElementById('turnDot').style.background = COLOR_HEX[g.current_turn];

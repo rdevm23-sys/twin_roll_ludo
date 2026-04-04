@@ -183,6 +183,10 @@ async def websocket_endpoint(ws: WebSocket):
                     if all_ready and len(current_room.players) >= 2:
                         player_pids = list(current_room.players.keys())
                         random.shuffle(player_pids)
+                        if len(player_pids) == 2:
+                            pair = random.choice([("red", "yellow"), ("green", "blue")])
+                            current_room.players[player_pids[0]]["color"] = pair[0]
+                            current_room.players[player_pids[1]]["color"] = pair[1]
                         colors = [current_room.players[pid]["color"] for pid in player_pids]
                         current_room.game = init_game_state(colors, "multiplayer", current_room.twin_dice)
                         current_room.started = True
