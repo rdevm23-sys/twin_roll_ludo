@@ -54,11 +54,28 @@
   justify-content: center;
   width: 4rem;
   height: 4rem;
-  border-radius: 1rem;
-  background: #f2f2f2;
-  border: 1px solid #dcdcdc;
+  border-radius: 0.8rem;
+  background: linear-gradient(145deg, #ffffff, #e6e6e6);
+  border: 2px solid #cccccc;
   color: #333;
   font-size: 2rem;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.dice::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 0.8rem;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0) 50%, rgba(0, 0, 0, 0.1) 100%);
+  pointer-events: none;
 }
 
 .welcome p {
