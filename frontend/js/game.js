@@ -50,6 +50,8 @@ const Game = {
     });
 
     WS.on('game_start', msg => {
+      this.myId = msg.your_id;
+      this.myColor = msg.your_color;
       this.gameState = msg.game;
       Board.build();
       this._renderGame();
@@ -57,6 +59,8 @@ const Game = {
     });
 
     WS.on('game_state_full', msg => {
+      this.myId = msg.your_id;
+      this.myColor = msg.your_color;
       this.gameState = msg.game;
       Board.build();
       this._renderGame();
@@ -182,6 +186,11 @@ const Game = {
     const btn = document.getElementById('readyBtn');
     btn.textContent = this.isReady ? '✓ Ready!' : "I'm Ready";
     btn.style.background = this.isReady ? 'var(--green)' : '';
+  },
+
+  startSinglePlayer() {
+    const name = 'Player 1'; // Default name for single player
+    WS.connect(() => WS.send({ action: 'start_single_player', name }));
   },
 
   // ── Game ──────────────────────────────────────────
