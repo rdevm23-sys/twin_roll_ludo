@@ -109,7 +109,12 @@ const Board = {
     if (!overlay || !boardEl) return;
 
     const boardRect = boardEl.getBoundingClientRect();
+    const overlayRect = overlay.getBoundingClientRect();
     const cellSize = boardRect.width / 15;
+
+    // Calculate board offset within overlay
+    const boardOffsetX = boardRect.left - overlayRect.left;
+    const boardOffsetY = boardRect.top - overlayRect.top;
 
     const renderedPieceIds = new Set();
     const cellMap = this._getPiecePositions(gameState);
@@ -118,8 +123,8 @@ const Board = {
       if (cellKey === 'finished') return;
 
       const [r, c] = cellKey.split('_').map(Number);
-      const top = r * cellSize;
-      const left = c * cellSize;
+      const top = r * cellSize + boardOffsetY;
+      const left = c * cellSize + boardOffsetX;
 
       pieces.forEach((p, stackIndex) => {
         const pieceId = `piece_${p.color}_${p.index}`;
@@ -132,7 +137,7 @@ const Board = {
         }
 
         // Set size dynamically based on cell size
-        const pieceSize = cellSize * 0.75;
+        const pieceSize = cellSize * 0.65; // Adjusted piece size
         el.style.width = `${pieceSize}px`;
         el.style.height = `${pieceSize}px`;
         el.style.fontSize = `${pieceSize * 0.45}px`;
@@ -140,7 +145,7 @@ const Board = {
         const isValid = myColor && validMoves && validMoves.some(m => m.piece_id === `${p.color}_${p.index}`);
         el.classList.toggle('valid-move', isValid);
 
-        const stackOffset = pieces.length > 1 ? (stackIndex - (pieces.length - 1) / 2) * 5 : 0;
+        const stackOffset = pieces.length > 1 ? (stackIndex - (pieces.length - 1) / 2) * (pieceSize * 0.1) : 0; // Dynamic stack offset
         const centerOffset = (cellSize - pieceSize) / 2;
 
         el.style.top = `${top + centerOffset + stackOffset}px`;

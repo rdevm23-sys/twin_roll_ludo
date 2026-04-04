@@ -81,9 +81,7 @@ const Game = {
       this._handleEvents(msg.events);
       this._renderDiceAfterMove(msg.remaining_dice);
       this._renderGame();
-      if (msg.extra_turn && msg.game.current_turn === this.myColor) {
-        UI.notify('🎲 Rolled a 6 — roll again!');
-      }
+      // Removed pop-up notification for rolling 6
     });
 
     WS.on('chat', msg => {
